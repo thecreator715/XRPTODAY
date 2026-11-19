@@ -581,14 +581,15 @@ async function storyApi(env, u) {
   const id = (u.searchParams.get('id') || '').replace(/[^a-z0-9]/gi, '').slice(0, 20); if (!id) return J({ error: 'id' }, 400);
   let it = null, kk = 'stocks';
   for (const k of ['stocks', 'metals']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; const f = l.find(x => String(x.id) === id); if (f) { it = f; kk = k; break; } }
+  let nd = null; if (!it) { nd = await env.KV.get('news', 'json').catch(() => null); const f = nd && (nd.items || []).find(x => String(x.id) === id); if (f) { it = f; kk = 'news'; } }
   if (!it) return J({ error: 'not found' }, 404);
-  const rel = ((await env.KV.get('mkl:' + kk, 'json').catch(() => null)) || []).filter(x => String(x.id) !== id && (x.c || []).some(c => (it.c || []).indexOf(c) >= 0)).slice(0, 6).map(x => ({ id: x.id, t: x.t, s: x.s, ts: x.ts }));
-  let brief = await env.KV.get('mkb:' + id);
+  const rel = (kk === 'news' ? (nd.items || []) : ((await env.KV.get('mkl:' + kk, 'json').catch(() => null)) || [])).filter(x => String(x.id) !== id && (x.c || []).some(c => (it.c || []).indexOf(c) >= 0)).slice(0, 6).map(x => ({ id: x.id, t: x.t, s: x.s, ts: x.ts }));
+  let brief = await env.KV.get('mkb2:' + id);
   if (!brief) {
-    const sys = 'You are a news-desk editor at XRPLTODAY. Write a short ORIGINAL brief in your own words about the story described. Use ONLY the headline and summary given. Do not invent facts, numbers, quotes or names. 80 to 120 words, plain text, two short paragraphs, no title, no bullet points, no advice to buy or sell. Do not copy phrases from the summary.';
-    const txt = await ai(env, sys, 'Headline: ' + it.t + '\nSource: ' + it.s + '\nPublisher summary: ' + (it.d || '(none)'), 320).catch(() => '');
-    brief = String(txt || '').replace(/\s+\n/g, '\n').trim().slice(0, 1200);
-    if (brief.length > 60) await env.KV.put('mkb:' + id, brief, { expirationTtl: 259200 }).catch(() => { }); else brief = '';
+    const sys = 'You are a news-desk editor at XRPLTODAY. Write an ORIGINAL article in your own words about the story described. Use ONLY the headline and summary given. Do not invent facts, numbers, quotes or names. 220 to 300 words, plain text, no title. Use 3 short paragraphs, then a line 'KEY POINTS:' followed by 3 lines each starting with '- ', then a line 'WHY IT MATTERS:' with one sentence for XRP and crypto readers. Never include advice to buy or sell. Do not copy phrases from the summary.';
+    const txt = await ai(env, sys, 'Headline: ' + it.t + '\nSource: ' + it.s + '\nPublisher summary: ' + (it.d || '(none)'), 700).catch(() => '');
+    brief = String(txt || '').replace(/\s+\n/g, '\n').trim().slice(0, 2600);
+    if (brief.length > 60) await env.KV.put('mkb2:' + id, brief, { expirationTtl: 259200 }).catch(() => { }); else brief = '';
   }
   return J({ k: kk, id, t: it.t, s: it.s, u: it.u, ts: it.ts, im: it.im || '', c: it.c || [], brief, rel }, 200, { 'cache-control': 'public, max-age=120' });
 }

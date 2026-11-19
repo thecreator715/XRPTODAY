@@ -308,7 +308,7 @@ var _xl=window.XD_load;window.XD_load=function(d){_xl(d);try{enhMkt();var l=docu
  var orig=window.XD_pre;
  window.XD_pre=function(items,d){var a=orig?orig(items,d):items,tn=window.__tnItems||[];if(!tn.length||a!==items&&a===S.items)return a;var ids={};a.forEach(function(x){ids[x.id]=1});return a.concat(tn.filter(function(x){return !ids[x.id]})).sort(function(x,y){return y.ts-x.ts})};
  fetch('/api/tn').then(function(r){return r.json()}).then(function(d){window.__tnItems=toItems(d.posts||[]);if(S.items&&S.items.length){var base=S.items.filter(function(x){return String(x.id).indexOf('tn:')!==0});S.items=window.XD_pre(base);if(A.render)A.render()}}).catch(function(){});
- document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a.row');if(!a||e.metaKey||e.ctrlKey||e.target.closest('.acts'))return;var h=a.getAttribute('href')||'';if(h.indexOf(location.origin+'/tokens/')===0){e.preventDefault();e.stopPropagation();A.go(h.slice(location.origin.length))}},true)})();
+ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a.row');if(!a||e.metaKey||e.ctrlKey||e.target.closest('.acts'))return;var h=a.getAttribute('href')||'';if(h.indexOf(location.origin+'/tokens/')===0){e.preventDefault();e.stopPropagation();A.go(h.slice(location.origin.length));return}var id=a.getAttribute('data-id');if(id&&/^[a-z0-9]+$/i.test(id)&&typeof go==='function'){e.preventDefault();e.stopPropagation();go('/story/'+id)}},true)})();
 
 /* v8 traffic beacon: visits, time on site, activity */
 (function(){try{if(navigator.doNotTrack==='1'||/^\/admin/.test(location.pathname))return;
@@ -351,7 +351,7 @@ window.XDshareX=function(it,xurl){
  try{if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({'image/png':p})]).then(function(){toast('Image copied — paste it (Ctrl/Cmd+V) into your X post')},function(){p.then(dl)});return}}catch(e){}
  p.then(dl);
  function dl(b){if(!b)return;var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='xrpltoday-post.png';document.body.appendChild(a);a.click();a.remove();toast('Image saved — attach it to your X post')}};
-function firstImg(){var i=document.querySelector('#vPost .art img,#vPost img,.mkart .mkhero img,.mkart img,#vMkt .mkhero img');return i?(i.getAttribute('src')||''):''}
+function firstImg(){var i=document.querySelector('#vPost .art img,#vPost img,.mkart img.mkhero,.mkart .mkhero img,.mkart img,#vMkt .mkhero img');return i?(i.getAttribute('src')||''):''}
 document.addEventListener('click',function(e){
  var a=e.target.closest&&e.target.closest('a[href^="https://twitter.com/intent/tweet"],#tvx');if(!a)return;
  var it,url;
