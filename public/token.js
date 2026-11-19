@@ -30,7 +30,7 @@ function getOhlc(md5,tf){var c=TF[tf],k='x2oh:'+md5+':'+tf;
 function sma(c,n){var o=[],s=0;for(var i=0;i<c.length;i++){s+=c[i][4];if(i>=n)s-=c[i-n][4];o.push(i>=n-1?s/n:null)}return o}
 function rsi(c,n){n=n||14;if(c.length<n+1)return null;var g=0,l=0;for(var i=1;i<=n;i++){var d=c[i][4]-c[i-1][4];if(d>=0)g+=d;else l-=d}g/=n;l/=n;for(i=n+1;i<c.length;i++){d=c[i][4]-c[i-1][4];g=(g*(n-1)+Math.max(d,0))/n;l=(l*(n-1)+Math.max(-d,0))/n}return l===0?100:100-100/(1+g/l)}
 function shareUrl(){return location.origin+'/token/'+encodeURIComponent(ST.slug)}
-function tweetUrl(){var t=ST.t,txt=(t?'$'+(t.name||t.currency)+' on the XRP Ledger — '+px(+t.usd)+' USD ('+((t.pro24h>=0?'+':'')+(+t.pro24h||0).toFixed(2))+'% 24h). Live chart & analytics on XRPLTODAY':'XRPL token on XRPLTODAY');return 'https://twitter.com/intent/tweet?text='+encodeURIComponent(txt+'\n\n'+shareUrl()+'\n\nView at XRPLTODAY.com #XRPL #XRP #XRPTODAY')}
+function tweetUrl(){var t=ST.t,txt=(t?'$'+(t.name||t.currency)+' on the XRP Ledger — '+px(+t.usd)+' USD ('+((t.pro24h>=0?'+':'')+(+t.pro24h||0).toFixed(2))+'% 24h). Live chart & analytics on XRPLTODAY':'XRPL token on XRPLTODAY');return 'https://twitter.com/intent/tweet?text='+encodeURIComponent(txt+'\n\nView at XRPLTODAY.com\n#XRPL #XRP #XRPLTODAY\n\n'+shareUrl())}
 function wlHas(){return WL.indexOf(ST.slug)>=0}
 function wlSave(){try{localStorage.setItem('x2wl',JSON.stringify(WL))}catch(e){}}
 
