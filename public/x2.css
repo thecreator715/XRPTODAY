@@ -726,3 +726,9 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #vToken .tkhd .back{margin:14px 0 6px}
 .art>a.back:first-child,.tn>a.back:first-child{margin-top:22px}
 @media(max-width:860px){a.back,.back{margin:22px 0 16px;font-size:15px}.art>a.back:first-child,.tn>a.back:first-child{margin-top:26px}#vToken .tkhd .back{margin:20px 0 8px}}
+
+/* v26 usd under xrp */
+.usdn{display:block;font-style:normal;font-size:.72em;font-weight:500;opacity:.6;margin-top:1px;white-space:nowrap}
+#tkpx2{font-size:.85rem;margin:2px 0}
+.tile em{font-style:normal}
+@media(max-width:759px){.tkbt{grid-template-columns:1fr 1fr}.tkbt #tksq{grid-column:1/-1;width:100%}}

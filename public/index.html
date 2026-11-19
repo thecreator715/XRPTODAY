@@ -386,7 +386,7 @@ function markNav(){var ns=document.querySelectorAll('.nav');for(var i=0;i<ns.len
   if(g)on=(g==='news'&&S.view==='news'&&S.tab==='All')||(g==='blog'&&(S.view==='blog'||S.view==='post')&&S.bf!=='d'&&location.pathname!=='/daily')||(g==='daily'&&location.pathname==='/daily')||(g==='stocks'&&location.pathname==='/stocks')||(g==='metals'&&location.pathname==='/metals')||(g==='ai'&&location.pathname==='/ai')||(g==='world'&&location.pathname==='/world');if(t)on=S.view==='news'&&S.tab===t;n.classList.toggle('on',on)}}
 function show(v){S.view=v;$('vNews').classList.toggle('hide',v!=='news');$('vBlog').classList.toggle('hide',v!=='blog');$('vPost').classList.toggle('hide',v!=='post');$('vStats').classList.toggle('hide',v!=='stats');$('vAds').classList.toggle('hide',v!=='ads');$('vSquares').classList.toggle('hide',v!=='squares');$('vToken').classList.toggle('hide',v!=='token');$('vTokens').classList.toggle('hide',v!=='tokens');$('vMkt').classList.toggle('hide',v!=='mkt');document.body.classList.toggle('stv',v==='stats'||v==='ads'||v==='squares'||v==='token'||v==='tokens'||v==='mkt');
   $('title').textContent=v==='news'?'News Terminal':v==='stats'?'Ledger Analytics':v==='ads'?'Advertise':v==='squares'?'XRPL Squares':v==='token'?'Token':v==='tokens'?'XRPL Token News':v==='mkt'?(location.pathname==='/top'?'Top 50 XRPL Tokens':location.pathname==='/metals'?'METALS':location.pathname==='/ai'?'AI Top Stories':location.pathname==='/world'?'World News':'Top Stock News'):'XRPLTODAY Blog';if(v!=='post')document.title='XRPLTODAY — Live XRP, XRPL & RLUSD News Terminal';$('colL').scrollTop=0;markNav();$('side').classList.remove('open');if(window.XD_show)window.XD_show(v)}
-function loadMk(k){if(window.XD_mk)return window.XD_mk(k);var e=document.createElement('script');e.src='/mk.js?v=4';e.onload=function(){window.XD_mk(k)};document.body.appendChild(e)}
+function loadMk(k){if(window.XD_mk)return window.XD_mk(k);var e=document.createElement('script');e.src='/mk.js?v=5';e.onload=function(){window.XD_mk(k)};document.body.appendChild(e)}
 function route(){var p=location.pathname;
   if(p.indexOf('/blog/')===0){show('post');openPost(decodeURIComponent(p.slice(6)))}
   else if(p==='/top'){show('mkt');loadMk('top')}
@@ -434,6 +434,6 @@ load(true);loadBlogs();
 setInterval(function(){document.visibilityState==="visible"&&load()},120000);setInterval(function(){document.visibilityState==="visible"&&loadBlogs()},600000);setInterval(function(){document.visibilityState==="visible"&&drawBlogCard()},60000);setInterval(drawCal,3600000);
 })();
 </script>
-<script src="/x2.js?v=5" defer></script>
+<script src="/x2.js?v=6" defer></script>
 </body>
 </html>
