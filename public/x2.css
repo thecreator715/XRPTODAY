@@ -628,3 +628,20 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
 .mkart .mkkp h3,.mkart .mkwhy h3{margin:0 0 8px;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--cyan)}
 .mkart .mkkp ul{margin:0;padding-left:18px;line-height:1.65}.mkart .mkwhy p{margin:0;line-height:1.65}
 .mkart .mkbrief p{font-size:16px;line-height:1.75}
+
+/* v16 top 50 tokens */
+.toppg .tophd{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.toppg h2{margin:0 0 4px}
+.toppg .topbt{display:flex;gap:8px}.toppg #topq{background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--text,#fff);padding:8px 12px;min-width:170px}
+.toppg .topkp{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.toppg .topkp .tile b{font-size:clamp(14px,1.5vw,20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toppg .topw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.toptb{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.toptb th{position:sticky;top:0;text-align:left;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;background:var(--panel)}
+.toptb th.on{color:var(--cyan)}.toptb th.r,.toptb td.r{text-align:right}
+.toptb td{padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.toptb tbody tr{cursor:pointer}.toptb tbody tr:hover{background:var(--hover)}
+.toptb .rk{color:var(--dim);width:36px}.toptb .tn{min-width:190px}.toptb .tnw{display:flex;align-items:center;gap:10px}
+.toptb .av{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex:none}
+.toptb .nm{display:flex;flex-direction:column}.toptb .nm small{color:var(--dim);font-size:10.5px}.toptb .vf{color:#35d6a0;font-style:normal;font-size:11px}
+@media(max-width:700px){.toppg .topkp{grid-template-columns:repeat(2,minmax(0,1fr))}.toptb .h2{display:none}}

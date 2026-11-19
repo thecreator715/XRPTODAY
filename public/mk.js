@@ -73,6 +73,36 @@ function story(id){var v=$('vMkt');v.innerHTML='<div class="art mkart"><div clas
   if(!d.im)fetch('/api/cover?u='+encodeURIComponent(d.u)).then(function(r){return r.json()}).then(function(c){var h=$('mkh');if(h&&c&&c.im){var g=new Image();g.className='mkhero';g.referrerPolicy='no-referrer';g.onload=function(){h.replaceWith(g)};g.src=c.im}}).catch(function(){})
  }).catch(function(){v.innerHTML='<div class="art mkart"><a class="back" href="/" data-nav="/">← Back</a><div class="empty">Could not load this story.</div></div>'})}
 
-window.XD_mk=function(k){if(String(k).indexOf('story:')===0)return story(k.slice(6));var nk=k==='metals'?'metals':'stocks';if(ST.k!==nk){ST.items=[];ST.f='All';ST.q=''}ST.k=nk;ST.f='All';ST.loading=1;ST.pend=0;ST.paused=false;shell();load();clearInterval(ST.iv);ST.iv=setInterval(function(){if(!$('mkfeed')||document.getElementById('vMkt').classList.contains('hide'))return;if(document.visibilityState==='visible')load();else stat()},300000);
+function tnum(v){if(v==null||isNaN(v))return '—';var a=Math.abs(v);if(a>=1e12)return (v/1e12).toFixed(2)+'T';if(a>=1e9)return (v/1e9).toFixed(2)+'B';if(a>=1e6)return (v/1e6).toFixed(2)+'M';if(a>=1e3)return (v/1e3).toFixed(1)+'K';return v.toFixed(a<10?2:0)}
+function tpx(v){v=+v;if(!v||isNaN(v))return '—';var a=Math.abs(v);if(a>=1000)return '$'+v.toLocaleString('en-US',{maximumFractionDigits:2});if(a>=1)return '$'+v.toFixed(4);if(a>=0.01)return '$'+v.toFixed(5);if(a>=1e-6)return '$'+v.toFixed(8);return '$'+v.toExponential(2)}
+function tpc(v){if(v==null||isNaN(v))return '<span class="mu">—</span>';v=+v;return '<span class="'+(v>=0?'up':'down')+'">'+(v>=0?'▲ ':'▼ ')+Math.abs(v).toFixed(2)+'%</span>'}
+var TOP={rows:[],sort:'vol24hxrp',dir:-1,q:'',ts:0,stale:0,busy:0};
+function topLoad(force){
+ if(TOP.busy)return;TOP.busy=1;
+ var P='/v1/tokens?start=0&limit=50&sortBy=vol24hxrp&sortType=desc';
+ fetch('https://api.xrpl.to'+P).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
+ .catch(function(){return new Promise(function(ok){setTimeout(ok,700)}).then(function(){return fetch('/api/sq/tokens?sort=vol24hxrp&dir=desc&limit=50').then(function(r){return r.json()})})})
+ .then(function(d){if(!d||!d.tokens||!d.tokens.length)throw new Error('none');TOP.rows=d.tokens.slice(0,50);TOP.ts=Date.now();TOP.stale=d.stale?1:0;try{localStorage.setItem('x2top',JSON.stringify({r:TOP.rows,ts:TOP.ts}))}catch(e){}},function(){var c=null;try{c=JSON.parse(localStorage.getItem('x2top'))}catch(e){}if(c&&c.r){TOP.rows=c.r;TOP.ts=c.ts;TOP.stale=1}})
+ .then(function(){TOP.busy=0;topDraw()});
+}
+function topDraw(){
+ var v=$('vMkt');if(!v||location.pathname!=='/top')return;
+ var rows=TOP.rows.slice(),q=TOP.q.toLowerCase(),k=TOP.sort;
+ rows.sort(function(a,b){return TOP.dir*((+a[k]||0)-(+b[k]||0))});
+ if(q)rows=rows.filter(function(t){return ((t.name||'')+' '+(t.currency||'')+' '+(t.issuer||'')).toLowerCase().indexOf(q)>=0});
+ var th=function(key,l,cls){return '<th class="'+(cls||'')+(k===key?' on':'')+'" data-s="'+key+'">'+l+(k===key?(TOP.dir<0?' ↓':' ↑'):'')+'</th>'};
+ var tb=rows.map(function(t,i){var nm=t.name||t.currency||'?',sl=t.slug||'';
+  return '<tr data-slug="'+esc(sl)+'"><td class="rk">'+(i+1)+'</td><td class="tn"><div class="tnw"><span class="av" style="background:hsl('+hue(t.md5||nm)+',65%,42%)">'+esc(nm.slice(0,2).toUpperCase())+'</span><span class="nm"><b>'+esc(nm)+(t.verified?' <i class="vf">✓</i>':'')+'</b><small>'+esc(t.currency||'')+' · '+esc((t.issuer||'').slice(0,6))+'…'+esc((t.issuer||'').slice(-4))+'</small></span></div></td><td class="r">'+tpx(t.usd)+'</td><td class="r">'+tpc(t.pro1h)+'</td><td class="r">'+tpc(t.pro24h)+'</td><td class="r">'+tpc(t.pro7d)+'</td><td class="r">'+tnum(t.vol24hxrp)+'</td><td class="r h2">'+tnum(t.marketcap)+'</td><td class="r h2">'+tnum(t.holders)+'</td><td class="r h2">'+tnum(t.vol24htx)+'</td></tr>'}).join('');
+ var tot=TOP.rows.reduce(function(a,t){return a+(+t.vol24hxrp||0)},0),up=TOP.rows.filter(function(t){return +t.pro24h>0}).length;
+ v.innerHTML='<div class="art toppg"><div class="tophd"><div><h2>Top 50 XRPL tokens</h2><div class="mu">Ranked by 24h trading volume · tap a token for its live page</div></div><div class="topbt"><input id="topq" type="search" placeholder="Search tokens…" value="'+esc(TOP.q)+'"><button class="btn2" id="toprf">Refresh</button></div></div>'+
+ '<div class="kp topkp"><div class="tile"><small>24H VOLUME (TOP 50)</small><b>'+tnum(tot)+'</b><em>XRP</em></div><div class="tile"><small>TOKENS UP 24H</small><b>'+up+' / '+TOP.rows.length+'</b><em>of the top 50</em></div><div class="tile"><small>TOP TOKEN</small><b>'+esc(TOP.rows[0]?(TOP.rows[0].name||TOP.rows[0].currency):'—')+'</b><em>by 24h volume</em></div><div class="tile"><small>UPDATED</small><b>'+(TOP.ts?new Date(TOP.ts).toISOString().slice(11,16)+' UTC':'—')+'</b><em>'+(TOP.stale?'saved data':'live')+'</em></div></div>'+
+ (TOP.rows.length?'<div class="topw"><table class="toptb"><thead><tr><th class="rk">#</th><th class="tn">Token</th>'+th('usd','Price','r')+th('pro1h','1h','r')+th('pro24h','24h','r')+th('pro7d','7d','r')+th('vol24hxrp','Volume 24h','r')+th('marketcap','Mkt cap','r h2')+th('holders','Holders','r h2')+th('vol24htx','Trades','r h2')+'</tr></thead><tbody>'+tb+'</tbody></table></div>':'<div class="empty">We could not load the token list right now — the data provider is busy.<br><button class="btn2 pri" onclick="location.reload()" style="margin-top:12px">Try again</button></div>')+
+ '<p class="disc">Data from xrpl.to · volume and market cap in XRP · not financial advice. Low-liquidity tokens can be volatile and easily manipulated.</p></div>';
+ var w=v.querySelector('.toptb');if(w)w.onclick=function(e){var h=e.target.closest('th[data-s]');if(h){var s=h.getAttribute('data-s');if(TOP.sort===s)TOP.dir*=-1;else{TOP.sort=s;TOP.dir=-1}topDraw();return}var r=e.target.closest('tr[data-slug]');if(r&&r.getAttribute('data-slug')){window.__tkfrom=1;history.pushState(null,'','/token/'+encodeURIComponent(r.getAttribute('data-slug')));window.dispatchEvent(new PopStateEvent('popstate'))}};
+ var qi=$('topq');if(qi)qi.oninput=function(){TOP.q=this.value;var p=this.selectionStart;topDraw();var n=$('topq');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
+ var rf=$('toprf');if(rf)rf.onclick=function(){if(Date.now()-TOP.ts<60000){this.textContent='Updated just now';return}topLoad(1)};
+}
+function topPage(){document.title='Top 50 XRPL tokens by volume — XRPLTODAY';var v=$('vMkt');if(!TOP.rows.length)v.innerHTML='<div class="art toppg"><div class="empty">Loading top tokens…</div></div>';else topDraw();if(!TOP.rows.length||Date.now()-TOP.ts>300000)topLoad()}
+window.XD_mk=function(k){if(k==='top')return topPage();if(String(k).indexOf('story:')===0)return story(k.slice(6));var nk=k==='metals'?'metals':'stocks';if(ST.k!==nk){ST.items=[];ST.f='All';ST.q=''}ST.k=nk;ST.f='All';ST.loading=1;ST.pend=0;ST.paused=false;shell();load();clearInterval(ST.iv);ST.iv=setInterval(function(){if(!$('mkfeed')||document.getElementById('vMkt').classList.contains('hide'))return;if(document.visibilityState==='visible')load();else stat()},300000);
 };
 })();
