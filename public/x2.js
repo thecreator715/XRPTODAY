@@ -134,7 +134,7 @@ function sentiment(){var P=/surge|rally|approv|win|partner|launch|adopt|gain|bul
 function drawStrip(){var x=mk('ripple'),b=mk('bitcoin'),r=mk('ripple-usd'),sn=sentiment(),hot=rawItems.filter(function(i){return i.i>=70&&Date.now()-i.ts<864e5}).length,l=S.xrpl;
  var up=x&&(x.c24!=null?x.c24>=0:(x.sp&&x.sp[x.sp.length-1]>=x.sp[0])),bu=b&&b.c24!=null?b.c24>=0:true;
  strip.innerHTML='<div class="tile hs"><small>XRP / USD</small><b>'+(x?'$'+x.p.toFixed(x.p<10?4:2):'—')+'</b><em>'+(x?pc(x.c24):'')+' 24h</em>'+(x?spk(x.sp,0,0,up?'#35d6a0':'#ff5d73','x'):'')+'</div>'+
- '<div class="tile hs"><small>BITCOIN</small><b>'+(b?'$'+Math.round(b.p).toLocaleString():'—')+'</b><em>'+(b?pc(b.c24):'')+' 24h</em>'+(b?spk(b.sp,0,0,bu?'#35d6a0':'#ff5d73','b'):'')+'</div>'+
+ '<div class="tile hs"><small>BITCOIN</small><b>'+(b?'$'+Math.round(b.p).toLocaleString():'—')+'</b><em>'+(b?pc(b.c24):'')+' 24h</em>'+(b?spk(b.sp,0,0,'#f7931a','b'):'')+'</div>'+
  '<div class="tile"><small>NEWS SENTIMENT 24H</small><b>'+sn.score+'<span style="font-size:12px;color:var(--muted)"> / 100</span></b><em>'+sn.p+' bullish · '+sn.n+' bearish headlines</em></div>'+
  '<div class="tile"><small>LEDGER</small><b>'+(l?'#'+Number(l.seq).toLocaleString():'—')+'</b><em>'+hot+' high-impact stories today</em></div>'}
 

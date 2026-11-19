@@ -146,10 +146,10 @@ function mergeAll(old, fresh, now) {
 async function market() {
   const K = async u => { const r = await fetch(u, { headers: UA, signal: AbortSignal.timeout(8000) }); const j = await r.json(); if (j.error && j.error.length) throw new Error('kraken'); return j.result; };
   try {
-    const [t, o, rl] = await Promise.all([K('https://api.kraken.com/0/public/Ticker?pair=XRPUSD,XBTUSD'), K('https://api.kraken.com/0/public/OHLC?pair=XRPUSD&interval=240'), K('https://api.kraken.com/0/public/Ticker?pair=RLUSDUSD').catch(() => null)]);
+    const [t, o, rl, ob] = await Promise.all([K('https://api.kraken.com/0/public/Ticker?pair=XRPUSD,XBTUSD'), K('https://api.kraken.com/0/public/OHLC?pair=XRPUSD&interval=240'), K('https://api.kraken.com/0/public/Ticker?pair=RLUSDUSD').catch(() => null), K('https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=240').then(r => r[Object.keys(r).find(k => k !== 'last')].slice(-42).map(c => +(+c[4]).toFixed(1))).catch(() => null)]);
     const mk = (id, x, sp) => { const p = +x.c[0], op = +x.o; return { id, p, c1: null, c24: op ? (p - op) / op * 100 : null, c7: sp && sp.length > 1 ? (p - sp[0]) / sp[0] * 100 : null, mc: null, v: +x.v[1] * +x.p[1], sp: sp || [] }; };
     const key = n => Object.keys(t).find(k => k.indexOf(n) >= 0), ox = o[Object.keys(o).find(k => k !== 'last')], sp = ox.slice(-42).map(c => +(+c[4]).toFixed(5));
-    const out = [mk('ripple', t[key('XRP')], sp), mk('bitcoin', t[key('XBT')], null)];
+    const out = [mk('ripple', t[key('XRP')], sp), mk('bitcoin', t[key('XBT')], ob)];
     if (rl) { const k = Object.keys(rl)[0]; if (k) out.push(mk('ripple-usd', rl[k], null)); }
     return out;
   } catch (e) { return null; }
