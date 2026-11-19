@@ -719,3 +719,10 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
  #vToken .kp .tile b{font-size:19px}
  #vToken .tkside{order:5}
 }
+
+/* v25 back button spacing */
+a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;padding:6px 2px;font-size:14px}
+#vToken .tkp2{padding-top:6px}
+#vToken .tkhd .back{margin:14px 0 6px}
+.art>a.back:first-child,.tn>a.back:first-child{margin-top:22px}
+@media(max-width:860px){a.back,.back{margin:22px 0 16px;font-size:15px}.art>a.back:first-child,.tn>a.back:first-child{margin-top:26px}#vToken .tkhd .back{margin:20px 0 8px}}
