@@ -645,3 +645,5 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
 .toptb .av{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex:none}
 .toptb .nm{display:flex;flex-direction:column}.toptb .nm small{color:var(--dim);font-size:10.5px}.toptb .vf{color:#35d6a0;font-style:normal;font-size:11px}
 @media(max-width:700px){.toppg .topkp{grid-template-columns:repeat(2,minmax(0,1fr))}.toptb .h2{display:none}}
+
+.toptb .tn{min-width:150px;max-width:200px}.toptb .nm b{display:block;max-width:130px;overflow:hidden;text-overflow:ellipsis}
