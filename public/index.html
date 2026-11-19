@@ -424,7 +424,7 @@ function load(first){
 function loadBlogs(){api('/api/blogs').then(function(b){S.blogs=b;drawBlogCard();drawDaily();if(S.view==='blog')drawGrid()}).catch(function(){})}
 drawTabs();setRng();markNav();drawCal();drawDaily();setInterval(tickCd,1000);drawLedger();route();
 load(true);loadBlogs();
-setInterval(load,20000);setInterval(loadBlogs,120000);setInterval(drawBlogCard,30000);setInterval(drawCal,3600000);
+setInterval(function(){document.visibilityState==="visible"&&load()},120000);setInterval(function(){document.visibilityState==="visible"&&loadBlogs()},600000);setInterval(function(){document.visibilityState==="visible"&&drawBlogCard()},60000);setInterval(drawCal,3600000);
 })();
 </script>
 <script src="/x2.js" defer></script>

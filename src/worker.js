@@ -430,9 +430,9 @@ async function tick(env, force) {
 async function news(env, ctx) {
   let d = await env.KV.get('news', 'json'); const now = Date.now();
   if (!d) { await tick(env); d = (await env.KV.get('news', 'json')) || { items: [], ts: 0 }; }
-  else if (now - d.ts > 10 * 6e4 && !busy) ctx.waitUntil(tick(env));
+  else if (now - d.ts > 25 * 6e4 && !busy) ctx.waitUntil(tick(env));
   const blogs = (await env.KV.get('blogs', 'json')) || [], ld = blogs.find(b => b.k === 'd');
-  return J({ items: d.items, mkt: d.mkt, xrpl: d.xrpl, ts: d.ts, next: nextDaily(now), lastDaily: ld ? ld.ts : 0 }, 200, { 'cache-control': 'public, max-age=8' });
+  return J({ items: d.items, mkt: d.mkt, xrpl: d.xrpl, ts: d.ts, next: nextDaily(now), lastDaily: ld ? ld.ts : 0 }, 200, { 'cache-control': 'public, max-age=60, s-maxage=60' });
 }
 /* ---------- XRPL token news submissions (paid, admin-approved) ---------- */
 async function tnCfg(env) { return Object.assign({ addr: '', price: 50 }, (await env.KV.get('tncfg', 'json')) || {}); }
@@ -611,7 +611,7 @@ async function hitApi(req, env, ctx) {
   const p = String(b.p || '/').split('?')[0].slice(0, 80);
   if (t === 'v') { d.v++; if (vid && d.vs.indexOf(vid) < 0 && d.vs.length < 3000) { d.vs.push(vid); d.u++; } if (b.dev === 'm') d.dv.m++; else d.dv.d++; inc(d.rf, String(b.rf || '').slice(0, 60)); }
   if (t === 'v' || t === 'pv') { d.pv++; d.h[dt.getUTCHours()]++; inc(d.pg, p); }
-  if (t === 'p') d.dur += Math.min(60, Math.max(0, +b.d || 0));
+  if (t === 'p') d.dur += Math.min(150, Math.max(0, +b.d || 0));
   if (t === 'e') inc(d.ev, String(b.e || '').slice(0, 40));
   d.live[s] = now; for (const k of Object.keys(d.live)) if (now - d.live[k] > 120000) delete d.live[k];
   try { await env.KV.put(key, JSON.stringify(d), { expirationTtl: 86400 * 120 }); } catch (e) { }

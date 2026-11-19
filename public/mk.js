@@ -43,7 +43,7 @@ function bind(){var v=$('vMkt');
    if(a2==='star'){if(ST.saved[id])delete ST.saved[id];else ST.saved[id]=1;ss('x2mksv',ST.saved);b.classList.toggle('on',!!ST.saved[id]);if(ST.f==='Saved')paintFeed()}
    else if(a2==='link'){try{navigator.clipboard.writeText(it.u)}catch(x){}b.classList.add('on');setTimeout(function(){b.classList.remove('on')},900)}
    else if(a2==='open'){window.open(it.u,'_blank','noopener')}
-   else if(a2==='x'){window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(it.t+'\n\n'+location.origin+'/story/'+it.id+'\n\nView at XRPTODAY.com '+META[ST.k].tag+' #XRPTODAY'),'_blank','noopener')}
+   else if(a2==='x'){window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(it.t+'\n\n'+location.origin+'/story/'+it.id+'\n\nView at XRPLTODAY.com '+META[ST.k].tag+' #XRPTODAY'),'_blank','noopener')}
    return}
   var row=t.closest('a.row');if(row){var rid=row.getAttribute('data-id');ST.seen[rid]=1;ss('x2mkseen',ST.seen);row.classList.remove('new')}}}
 function load(manual){ST.loading=!ST.items.length;if(ST.loading&&$('mkfeed'))paintFeed();
@@ -53,7 +53,7 @@ function story(id){var v=$('vMkt');v.innerHTML='<div class="art mkart"><div clas
  fetch('/api/story?id='+encodeURIComponent(id)).then(function(r){return r.json()}).then(function(d){
   if(d.error){v.innerHTML='<div class="art mkart"><a class="back" href="/stocks" data-nav="/stocks">← Markets</a><div class="empty">This story is no longer available.</div></div>';return}
   var back='/'+d.k,lab=d.k==='metals'?'METALS':'Top Stock News',su=location.origin+'/story/'+d.id,
-  share='https://twitter.com/intent/tweet?text='+encodeURIComponent(d.t+'\n\n'+su+'\n\nView at XRPTODAY.com '+(d.k==='metals'?'#Gold #Silver #Copper':'#Stocks')+' #XRPTODAY');
+  share='https://twitter.com/intent/tweet?text='+encodeURIComponent(d.t+'\n\n'+su+'\n\nView at XRPLTODAY.com '+(d.k==='metals'?'#Gold #Silver #Copper':'#Stocks')+' #XRPTODAY');
   document.title=d.t+' — XRPTODAY';
   v.innerHTML='<div class="art mkart"><a class="back" href="'+back+'" data-nav="'+back+'">← '+lab+'</a>'+(d.im?'<img class="mkhero" referrerpolicy="no-referrer" alt="" src="'+esc(d.im)+'" onerror="this.remove()">':'<div class="mkhero fb" id="mkh" style="--h:'+hue(d.t+d.s)+'"></div>')+'<h2>'+esc(d.t)+'</h2><div class="am"><span>'+esc(d.s)+'</span><span>'+new Date(d.ts).toUTCString().slice(0,22)+' UTC</span>'+(d.c||[]).map(function(c){return '<span class="tg">'+esc(c)+'</span>'}).join('')+'</div>'+
   (d.brief?'<div class="body mkbrief">'+d.brief.split(/\n+/).map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+'<p class="disc">Automatically written XRPLTODAY summary based on the publisher’s headline and snippet. Not financial advice.</p></div>':'<div class="body"><p class="mu">A summary is not available for this story. Open the original for the full article.</p></div>')+
@@ -63,6 +63,6 @@ function story(id){var v=$('vMkt');v.innerHTML='<div class="art mkart"><div clas
   if(!d.im)fetch('/api/cover?u='+encodeURIComponent(d.u)).then(function(r){return r.json()}).then(function(c){var h=$('mkh');if(h&&c&&c.im){var g=new Image();g.className='mkhero';g.referrerPolicy='no-referrer';g.onload=function(){h.replaceWith(g)};g.src=c.im}}).catch(function(){})
  }).catch(function(){v.innerHTML='<div class="art mkart"><a class="back" href="/stocks" data-nav="/stocks">← Markets</a><div class="empty">Could not load this story.</div></div>'})}
 
-window.XD_mk=function(k){if(String(k).indexOf('story:')===0)return story(k.slice(6));var nk=k==='metals'?'metals':'stocks';if(ST.k!==nk){ST.items=[];ST.f='All';ST.q=''}ST.k=nk;ST.f='All';ST.loading=1;ST.pend=0;ST.paused=false;shell();load();clearInterval(ST.iv);ST.iv=setInterval(function(){if(!$('mkfeed')||document.getElementById('vMkt').classList.contains('hide'))return;if(document.visibilityState==='visible')load();else stat()},60000);
- setInterval(function(){if($('mkst')&&!$('vMkt').classList.contains('hide')){stat();var r=document.querySelectorAll('#mkfeed .row .age'),a=vis();for(var i=0;i<r.length&&i<a.length;i++)r[i].textContent=ago(a[i].ts)}},15000)};
+window.XD_mk=function(k){if(String(k).indexOf('story:')===0)return story(k.slice(6));var nk=k==='metals'?'metals':'stocks';if(ST.k!==nk){ST.items=[];ST.f='All';ST.q=''}ST.k=nk;ST.f='All';ST.loading=1;ST.pend=0;ST.paused=false;shell();load();clearInterval(ST.iv);ST.iv=setInterval(function(){if(!$('mkfeed')||document.getElementById('vMkt').classList.contains('hide'))return;if(document.visibilityState==='visible')load();else stat()},300000);
+};
 })();
