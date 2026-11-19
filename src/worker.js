@@ -176,6 +176,7 @@ async function refresh(env, force) {
 
 /* ---------- AI + posts ---------- */
 async function ai(env, sys, user, max) {
+  if ((await ctlGet(env)).aiOff) throw new Error('ai disabled by admin');
   for (const m of ['@cf/meta/llama-3.3-70b-instruct-fp8-fast', '@cf/meta/llama-3.3-70b-instruct-fp8-fast']) {
     try {
       const r = await env.AI.run(m, { messages: [{ role: 'system', content: sys }, { role: 'user', content: user }], max_tokens: max, temperature: 0.85 });
@@ -419,13 +420,13 @@ async function adsAdmin(b, env) {
 /* ---------- orchestration ---------- */
 async function topRefresh(env) { const sv = await env.KV.get('toptok', 'json').catch(() => null); if (sv && Date.now() - sv.ts < 12 * 6e4) return 'fresh'; const d = await sqGet('/v1/tokens?start=0&limit=50&sortBy=vol24hxrp&sortType=desc', 60); if (!(d.tokens || []).length) return 'empty'; await env.KV.put('toptok', JSON.stringify({ ts: Date.now(), t: d.tokens.slice(0, 50) }), { expirationTtl: 86400 }); return 'ok'; }
 async function tick(env, force) {
-  if (busy) return { busy: true }; busy = true; const log = {};
+  if (busy) return { busy: true }; const C = await ctlGet(env); if (C.cronOff && !force) return { off: 1 }; busy = true; const log = {};
   try {
     log.news = await refresh(env, force).catch(e => 'ERR ' + e.message);
     log.stats = await stats(env).catch(e => 'ERR ' + e.message);
     log.top = await topRefresh(env).catch(e => 'ERR ' + e.message);
-    log.hourly = await hourly(env).catch(e => 'ERR ' + e.message);
-    log.daily = await daily(env).catch(e => 'ERR ' + e.message);
+    log.hourly = C.noHourly ? 'off' : await hourly(env).catch(e => 'ERR ' + e.message);
+    log.daily = C.noDaily ? 'off' : await daily(env).catch(e => 'ERR ' + e.message);
   } finally { busy = false; }
   return log;
 }
@@ -434,7 +435,8 @@ async function news(env, ctx) {
   if (!d) { await tick(env); d = (await env.KV.get('news', 'json')) || { items: [], ts: 0 }; }
   else if (now - d.ts > 25 * 6e4 && !busy) ctx.waitUntil(tick(env));
   const blogs = (await env.KV.get('blogs', 'json')) || [], ld = blogs.find(b => b.k === 'd');
-  return J({ items: d.items, mkt: d.mkt, xrpl: d.xrpl, ts: d.ts, next: nextDaily(now), lastDaily: ld ? ld.ts : 0 }, 200, { 'cache-control': 'public, max-age=60, s-maxage=60' });
+  const C = await ctlGet(env);
+  return J({ items: ctlItems(d.items, C), mkt: d.mkt, xrpl: d.xrpl, ts: d.ts, next: nextDaily(now), lastDaily: ld ? ld.ts : 0 }, 200, { 'cache-control': 'public, max-age=' + (+C.cacheSec || 60) + ', s-maxage=' + (+C.cacheSec || 60) });
 }
 /* ---------- XRPL token news submissions (paid, admin-approved) ---------- */
 async function tnCfg(env) { return Object.assign({ addr: '', price: 50 }, (await env.KV.get('tncfg', 'json')) || {}); }
@@ -493,6 +495,7 @@ async function admin(req, env) {
   if (/^ad-/.test(b.action || '')) return await adsAdmin(b, env);
   if (b.action === 'an-get') return await anGet(b, env);
   if (/^tn-/.test(b.action || '')) return await tnAdmin(b, env);
+  if (/^ctl-/.test(b.action || '')) return await ctlAdmin(b, env);
   if (b.action === 'daily') return J(await daily(env, true));
   if (b.action === 'delete-post' && b.slug) { await env.KV.delete('b:' + b.slug); const l = ((await env.KV.get('blogs', 'json')) || []).filter(x => x.slug !== b.slug); await env.KV.put('blogs', JSON.stringify(l)); return J({ ok: 1 }); }
   return J({ error: 'bad request' }, 400);
@@ -601,10 +604,11 @@ async function storyApi(env, u) {
   let nd = null; if (!it) { nd = await env.KV.get('news', 'json').catch(() => null); const f = nd && (nd.items || []).find(x => String(x.id) === id); if (f) { it = f; kk = 'news'; } }
   if (!it) return J({ error: 'not found' }, 404);
   const rel = (kk === 'news' ? (nd.items || []) : ((await env.KV.get('mkl:' + kk, 'json').catch(() => null)) || [])).filter(x => String(x.id) !== id && (x.c || []).some(c => (it.c || []).indexOf(c) >= 0)).slice(0, 6).map(x => ({ id: x.id, t: x.t, s: x.s, ts: x.ts }));
-  let brief = await env.KV.get('mkb2:' + id);
-  if (!brief) {
+  const C = await ctlGet(env);
+  let brief = C.noBrief ? '' : await env.KV.get('mkb2:' + id);
+  if (!brief && !C.noBrief) {
     const sys = 'You are a news-desk editor at XRPLTODAY. Write an ORIGINAL article in your own words about the story described. Use ONLY the headline and summary given. Do not invent facts, numbers, quotes or names. 220 to 300 words, plain text, no title. Use 3 short paragraphs, then a line KEY POINTS: followed by 3 lines each starting with a dash, then a line WHY IT MATTERS: with one sentence for XRP and crypto readers. Never include advice to buy or sell. Do not copy phrases from the summary.';
-    const txt = await ai(env, sys, 'Headline: ' + it.t + '\nSource: ' + it.s + '\nPublisher summary: ' + (it.d || '(none)'), 700).catch(() => '');
+    const txt = await ai(env, sys + (C.briefExtra ? ' ' + String(C.briefExtra).replace(/[\r\n]+/g, ' ').slice(0, 400) : ''), 'Headline: ' + it.t + '\nSource: ' + it.s + '\nPublisher summary: ' + (it.d || '(none)'), 700).catch(() => '');
     brief = String(txt || '').replace(/\s+\n/g, '\n').trim().slice(0, 2600);
     if (brief.length > 60) await env.KV.put('mkb2:' + id, brief, { expirationTtl: 259200 }).catch(() => { }); else brief = '';
   }
@@ -620,8 +624,46 @@ async function mktApi(req, env, ctx, u) {
   items.sort((a, b) => b.ts - a.ts);
   const top = items.slice(0, 90), old = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || [], have = new Set(top.map(x => x.id)), keep = top.concat(old.filter(x => !have.has(x.id) && now - x.ts < 72 * 36e5)).slice(0, 300);
   ctx.waitUntil(env.KV.put('mkl:' + k, JSON.stringify(keep), { expirationTtl: 259200 }).catch(() => { }));
-  const r = new Response(JSON.stringify({ k, items: top.map(x => ({ id: x.id, t: x.t, s: x.s, u: x.u, ts: x.ts, im: x.im, c: x.c })), ts: now }), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'public, max-age=300' } });
+  const r = new Response(JSON.stringify({ k, items: ctlItems(top, await ctlGet(env), 1).map(x => ({ id: x.id, t: x.t, s: x.s, u: x.u, ts: x.ts, im: x.im, c: x.c })), ts: now }), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'public, max-age=300' } });
   ctx.waitUntil(cache.put(ck, r.clone())); return r;
+}
+/* ---------- site control (admin-managed settings) ---------- */
+const CTLK = { maint: 'b', maintMsg: 's', banner: 's', bannerType: 's', bannerLink: 's', bannerUntil: 's', bannerClose: 'b', customCss: 's', homePath: 's',
+  hideBlog: 'b', hideDaily: 'b', hideStats: 'b', hideSquares: 'b', hideTokens: 'b', hideTop: 'b', hideStocks: 'b', hideMetals: 'b', hideAi: 'b', hideAdvertise: 'b', hideCal: 'b',
+  hideSearch: 'b', hideRight: 'b', hideTicker: 'b',
+  blockWords: 's', blockSrc: 's', blockIds: 's', maxItems: 'n', mktMax: 'n', maxAgeH: 'n', lowQ: 'b', needImg: 'b',
+  aiOff: 'b', noHourly: 'b', noDaily: 'b', noBrief: 'b', briefExtra: 's', cacheSec: 'n', cronOff: 'b' };
+let _ctl = null, _ctlT = 0;
+async function ctlGet(env, fresh) { if (!fresh && _ctl && Date.now() - _ctlT < 15000) return _ctl; _ctl = (await env.KV.get('ctl', 'json').catch(() => null)) || {}; _ctlT = Date.now(); return _ctl; }
+function ctlItems(a, C, mk) {
+  const L = s => String(s || '').toLowerCase().split(/[,\n]/).map(x => x.trim()).filter(Boolean), bw = L(C.blockWords), bs = L(C.blockSrc), bi = String(C.blockIds || '').split(/[,\s]+/).filter(Boolean), age = +C.maxAgeH || 0, now = Date.now();
+  let o = (a || []).filter(x => { const t = ((x.t || '') + ' ' + (x.s || '')).toLowerCase(); if (bw.some(w => t.includes(w))) return false; const s = String(x.s || '').toLowerCase(); if (bs.some(w => s.includes(w))) return false; if (bi.includes(String(x.id))) return false; if (age && now - x.ts > age * 36e5) return false; if (C.lowQ && String(x.t || '').length < 25) return false; if (mk && C.needImg && !x.im) return false; return true; });
+  const mx = +(mk ? C.mktMax : C.maxItems) || 0; return mx ? o.slice(0, mx) : o;
+}
+async function ctlPurge(env, pre, cap) { let n = 0, cur; do { const l = await env.KV.list({ prefix: pre, cursor: cur, limit: 200 }); for (const k of l.keys) { await env.KV.delete(k.name); n++; if (n >= (cap || 600)) return n; } cur = l.list_complete ? null : l.cursor; } while (cur); return n; }
+async function ctlAdmin(b, env) {
+  const a = b.action;
+  if (a === 'ctl-get') return J({ cfg: await ctlGet(env, true), log: ((await env.KV.get('ctllog', 'json')) || []).slice(0, 40) }, 200, { 'cache-control': 'no-store' });
+  if (a === 'ctl-set' || a === 'ctl-import' || a === 'ctl-reset') {
+    const cur = await ctlGet(env, true), src = a === 'ctl-reset' ? {} : (b.patch || {}), next = a === 'ctl-set' ? Object.assign({}, cur) : {}, ch = [];
+    for (const k of Object.keys(CTLK)) { if (a !== 'ctl-set' && a !== 'ctl-reset' && !(k in src)) continue; if (a === 'ctl-set' && !(k in src)) continue; const t = CTLK[k], v = src[k]; let nv; if (t === 'b') nv = !!v; else if (t === 'n') nv = Math.max(0, Math.min(100000, +v || 0)); else nv = String(v == null ? '' : v).slice(0, 4000); if (nv === '' || nv === false || nv === 0) delete next[k]; else next[k] = nv; if (JSON.stringify(cur[k]) !== JSON.stringify(next[k])) ch.push(k); }
+    if (a === 'ctl-reset') ch.push('(all reset)');
+    await env.KV.put('ctl', JSON.stringify(next)); _ctl = next; _ctlT = Date.now();
+    if (ch.length) { const lg = ((await env.KV.get('ctllog', 'json')) || []); lg.unshift({ ts: Date.now(), a, ch }); await env.KV.put('ctllog', JSON.stringify(lg.slice(0, 50))); }
+    return J({ ok: 1, cfg: next, changed: ch });
+  }
+  if (a === 'ctl-purge') {
+    const m = { briefs: ['mkb2:', 'mkb:'], top: ['toptok'], tokens: ['tk:'], market: ['mkl:'], news: ['news'] }[b.what]; if (!m) return J({ error: 'what' }, 400);
+    let n = 0; for (const p of m) n += (p === 'toptok' || p === 'news') ? (await env.KV.delete(p), 1) : await ctlPurge(env, p); return J({ ok: 1, removed: n });
+  }
+  if (a === 'ctl-regen') { const id = String(b.id || '').replace(/[^a-z0-9]/gi, ''); if (!id) return J({ error: 'id' }, 400); await env.KV.delete('mkb2:' + id); return J({ ok: 1 }); }
+  if (a === 'ctl-stats') {
+    const o = {}; for (const [k, p] of [['briefs', 'mkb2:'], ['tokens', 'tk:'], ['posts', 'b:'], ['analytics_days', 'an:']]) { const l = await env.KV.list({ prefix: p, limit: 1000 }); o[k] = l.keys.length + (l.list_complete ? '' : '+'); }
+    const n = await env.KV.get('news', 'json').catch(() => null); o.news_items = n ? (n.items || []).length : 0; o.news_age_min = n ? Math.round((Date.now() - n.ts) / 6e4) : null;
+    for (const k of ['stocks', 'metals', 'ai']) { const l = await env.KV.get('mkl:' + k, 'json').catch(() => null); o['feed_' + k] = l ? l.length : 0; }
+    return J(o);
+  }
+  return J({ error: 'bad ctl action' }, 400);
 }
 /* ---------- traffic analytics ---------- */
 const BOTUA = /bot|spider|crawl|slurp|facebookexternalhit|preview|headless|monitor|lighthouse|curl|wget/i;
@@ -654,6 +696,7 @@ export default {
     const u = new URL(req.url), p = u.pathname;
     try {
       if (p === '/api/news') return await news(env, ctx);
+      if (p === '/api/cfg') return J(await ctlGet(env), 200, { 'cache-control': 'public, max-age=30' });
       if (p === '/api/hit') return await hitApi(req, env, ctx);
       if (p === '/api/story') return await storyApi(env, u);
       if (p === '/api/mkt') return await mktApi(req, env, ctx, u);
