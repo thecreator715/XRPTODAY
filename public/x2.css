@@ -678,3 +678,7 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
 #msx .up{color:#35d6a0;font-style:normal}#msx .dn{color:#ff5d73;font-style:normal}
 #msx .msh{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--dim,#8b96a8);padding:8px 10px 2px}
 #msx .mh{display:block}#msx .msf{font-size:10.5px;color:var(--dim,#8b96a8);padding:8px 10px 4px;border-top:1px solid var(--line,#263041);margin-top:4px}#msx .msf a{color:inherit;text-decoration:underline}
+
+/* v19 mobile bottom fix */
+@supports(height:100dvh){.app,.main{height:100dvh}}
+@media(max-width:860px){.col,body.stv .col,body.stv #vSquares{padding-bottom:calc(120px + env(safe-area-inset-bottom))!important}.rcol{padding-bottom:120px}}
