@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal</title>
+<!--META-->
+<meta name="description" content="Real-time worldwide news terminal for XRP, the XRP Ledger and RLUSD, with a new AI-written market brief every hour.">
+<meta name="theme-color" content="#05070b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231f5cff'/%3E%3Cstop offset='1' stop-color='%2359c6ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M9 9l14 14M23 9L9 23' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="alternate" type="application/rss+xml" title="XRPLTODAY Blog" href="/rss.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070b;--bg2:#090d14;--panel:#0b1018;--panel2:#0f1520;--line:rgba(170,195,235,.09);--line2:rgba(170,195,235,.16);
+  --text:#e6ecf7;--silver:#c4cfe0;--muted:#7b889e;--dim:#54617a;
+  --blue:#3d8bff;--blue2:#1f5cff;--cyan:#59c6ff;--glow:rgba(61,139,255,.35);
+  --grad:linear-gradient(135deg,#1f5cff 0%,#3d8bff 48%,#59c6ff 100%);
+  --grad-soft:linear-gradient(135deg,rgba(31,92,255,.22),rgba(89,198,255,.10));
+  --up:#35d6a0;--down:#ff5d73;--hover:rgba(61,139,255,.07);
+  --shadow:0 10px 40px rgba(0,0,0,.45);
+}
+[data-theme=light]{
+  --bg:#eef1f6;--bg2:#e6eaf2;--panel:#ffffff;--panel2:#f4f6fb;--line:rgba(20,40,80,.09);--line2:rgba(20,40,80,.16);
+  --text:#0d1524;--silver:#2a374d;--muted:#5d6b84;--dim:#8995ab;--hover:rgba(31,92,255,.06);--shadow:0 10px 30px rgba(20,40,80,.12);--glow:rgba(31,92,255,.2);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(900px 500px at 78% -10%,rgba(31,92,255,.16),transparent 60%),radial-gradient(700px 500px at 5% 105%,rgba(89,198,255,.07),transparent 60%);z-index:0}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.mono{font-family:'JetBrains Mono',monospace}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:rgba(150,175,215,.18);border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:262px minmax(0,1fr);height:100vh}
+/* sidebar */
+.side{background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 30%),var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 14px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 18px}
+.logo{width:36px;height:36px;border-radius:11px;background:var(--grad);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(255,255,255,.18) inset,0 8px 24px var(--glow)}
+.brand b{font-size:19px;font-weight:800;letter-spacing:-.4px;background:linear-gradient(180deg,#fff,#aebbd2);-webkit-background-clip:text;background-clip:text;color:transparent}
+[data-theme=light] .brand b{background:linear-gradient(180deg,#0d1524,#3a4a66);-webkit-background-clip:text;background-clip:text}
+.brand b i{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sec{font-size:10.5px;font-weight:700;letter-spacing:1.6px;color:var(--dim);padding:18px 10px 8px}
+.nav{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:11px;color:var(--muted);font-weight:500;font-size:14px;transition:.15s;text-align:left;border:1px solid transparent}
+.nav svg{width:18px;height:18px;flex:none;opacity:.85}
+.nav:hover{color:var(--text);background:var(--hover)}
+.nav.on{color:#fff;background:var(--grad-soft);border-color:rgba(61,139,255,.28);box-shadow:0 0 24px rgba(61,139,255,.08) inset}
+[data-theme=light] .nav.on{color:#0d1524}
+.nav .bd{margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--grad);color:#fff}
+.grow{flex:1}
+.rsscard{margin:14px 2px 10px;padding:14px;border-radius:14px;background:var(--grad-soft);border:1px solid rgba(61,139,255,.25)}
+.rsscard b{display:block;font-size:13.5px;margin-bottom:3px}
+.rsscard span{font-size:12px;color:var(--muted);line-height:1.45;display:block;margin-bottom:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 14px;border-radius:10px;background:var(--grad);color:#fff;font-weight:600;font-size:13px;box-shadow:0 6px 22px var(--glow);transition:.15s}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.foot{font-size:11px;color:var(--dim);padding:10px 8px 0;line-height:1.6}
+/* main */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 392px;grid-template-rows:auto auto minmax(0,1fr);height:100vh;min-width:0}
+.top{grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:16px 28px 12px}
+.top h1{font-size:21px;font-weight:700;letter-spacing:-.4px}
+.sp{flex:1}
+.live{display:flex;align-items:center;gap:8px;padding:7px 13px;border-radius:30px;background:rgba(53,214,160,.08);border:1px solid rgba(53,214,160,.25);font-size:11.5px;font-weight:700;letter-spacing:1px;color:var(--up)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--up);box-shadow:0 0 0 0 rgba(53,214,160,.6);animation:pl 1.6s infinite}
+@keyframes pl{70%{box-shadow:0 0 0 8px rgba(53,214,160,0)}100%{box-shadow:0 0 0 0 rgba(53,214,160,0)}}
+.clock{font-size:12px;color:var(--muted)}
+.ib{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--muted);border:1px solid var(--line);background:var(--panel)}
+.ib:hover{color:var(--text);border-color:var(--line2)}
+.burger{display:none}
+.ticker{grid-column:1/-1;margin:0 28px 14px;border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden;position:relative;height:40px}
+.ticker:before,.ticker:after{content:"";position:absolute;top:0;bottom:0;width:60px;z-index:2;pointer-events:none}
+.ticker:before{left:0;background:linear-gradient(90deg,var(--panel),transparent)}.ticker:after{right:0;background:linear-gradient(-90deg,var(--panel),transparent)}
+.tk{display:flex;gap:44px;white-space:nowrap;align-items:center;height:40px;padding-left:30px;animation:mq 55s linear infinite;width:max-content}
+.ticker:hover .tk{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.tk span{font-size:12.5px;color:var(--silver);display:flex;gap:9px;align-items:center}
+.tk b{font-weight:700;color:var(--text)}
+.up{color:var(--up)}.down{color:var(--down)}
+.col{min-height:0;overflow-y:auto;padding:0 12px 28px 28px}
+.rcol{min-height:0;overflow-y:auto;padding:0 28px 28px 8px}
+/* controls */
+.search{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0 16px;height:46px;transition:.15s}
+.search:focus-within{border-color:rgba(61,139,255,.5);box-shadow:0 0 0 4px rgba(61,139,255,.1)}
+.search input{flex:1;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:14.5px}
+.search input::placeholder{color:var(--dim)}
+.search svg{width:18px;height:18px;color:var(--dim)}
+.tabs{display:flex;gap:4px;margin-top:14px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{padding:8px 16px;border-radius:10px;color:var(--muted);font-weight:500;white-space:nowrap;transition:.15s;font-size:13.5px}
+.tabs button:hover{color:var(--text)}
+.tabs button.on{background:var(--grad);color:#fff;font-weight:600;box-shadow:0 4px 18px var(--glow)}
+.imp{display:flex;align-items:center;gap:16px;margin-top:12px;padding:10px 16px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.imp label{font-size:13px;color:var(--muted);white-space:nowrap}
+.imp output{font-weight:700;min-width:42px;text-align:right;font-size:13.5px}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:5px;border-radius:5px;background:linear-gradient(90deg,#1f5cff var(--p,35%),rgba(150,175,215,.14) var(--p,35%));outline:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:#0b1018;border:3px solid var(--cyan);box-shadow:0 0 14px var(--glow);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#0b1018;border:3px solid var(--cyan);cursor:pointer}
+.seg{display:flex;background:var(--bg2);border-radius:10px;padding:3px;border:1px solid var(--line)}
+.seg button{padding:6px 13px;border-radius:8px;font-size:12.5px;color:var(--muted);font-weight:500}
+.seg button.on{background:var(--panel2);color:var(--text);box-shadow:0 1px 0 var(--line2) inset,0 2px 8px rgba(0,0,0,.25)}
+.stat{display:flex;align-items:center;justify-content:space-between;margin:16px 4px 8px;font-size:11.5px;color:var(--dim);letter-spacing:.3px}
+.stat b{color:var(--muted);font-weight:600}
+/* feed */
+.feed{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.row{display:block;padding:16px 22px 17px;border-bottom:1px solid var(--line);position:relative;transition:background .15s}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--hover)}
+.row.hot:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad);box-shadow:0 0 14px var(--glow)}
+.row.new{animation:nw 2.4s ease-out}
+@keyframes nw{0%{background:rgba(61,139,255,.28)}100%{background:transparent}}
+.meta{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:12px;flex-wrap:wrap}
+.age{font-weight:700;color:var(--silver);min-width:26px}
+.src{font-weight:700;color:var(--cyan);font-size:11.5px;letter-spacing:.3px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.more{font-size:10.5px;font-weight:700;color:var(--muted);padding:1px 7px;border:1px solid var(--line2);border-radius:20px}
+.tg{font-size:10px;font-weight:700;letter-spacing:.8px;padding:2px 8px;border-radius:6px;background:var(--grad-soft);color:#9cc4ff;border:1px solid rgba(61,139,255,.22);text-transform:uppercase}
+[data-theme=light] .tg{color:#1f5cff}
+.tg.g{background:rgba(255,255,255,.04);color:var(--muted);border-color:var(--line2)}
+.mt{margin-left:auto;width:46px;height:4px;border-radius:4px;background:rgba(150,175,215,.14);overflow:hidden}
+.mt i{display:block;height:100%;background:var(--grad)}
+.hl{font-size:15.5px;font-weight:600;letter-spacing:.1px;line-height:1.38;text-transform:uppercase;color:var(--text)}
+.empty{padding:50px 20px;text-align:center;color:var(--muted)}
+.loadmore{display:block;width:100%;padding:15px;color:var(--cyan);font-weight:600;border-top:1px solid var(--line)}
+.sk{height:78px;margin:0;border-bottom:1px solid var(--line);background:linear-gradient(90deg,transparent,rgba(120,160,230,.07),transparent);background-size:200% 100%;animation:sh 1.4s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+/* cards */
+.card{background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+.card h3{font-size:14.5px;font-weight:700;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card h3 a{font-size:12px;color:var(--cyan);font-weight:500}
+.px{font-size:34px;font-weight:800;letter-spacing:-1px;background:linear-gradient(180deg,#fff,#9fb2d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+[data-theme=light] .px{background:linear-gradient(180deg,#0d1524,#3a4a66);-webkit-background-clip:text;background-clip:text}
+.chips{display:flex;gap:7px;margin:8px 0 12px}
+.chip{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:8px;background:rgba(150,175,215,.08)}
+.chip small{color:var(--dim);font-weight:600;margin-right:5px}
+.chip.u{background:rgba(53,214,160,.1)}.chip.d{background:rgba(255,93,115,.1)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.kv div{padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--line)}
+.kv small{display:block;font-size:10.5px;color:var(--dim);letter-spacing:.8px;font-weight:600;margin-bottom:3px}
+.kv b{font-size:13.5px}
+.mini{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+.mini span{color:var(--muted);font-weight:500}
+.cal{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.cal .d{width:46px;text-align:center;border-radius:10px;padding:6px 0;background:var(--bg2);border:1px solid var(--line)}
+.cal .d b{display:block;font-size:17px;line-height:1.1}.cal .d small{font-size:10px;color:var(--cyan);font-weight:700;letter-spacing:1px}
+.cal.nx .d{background:var(--grad-soft);border-color:rgba(61,139,255,.35)}
+.cal p{font-size:13px;font-weight:600}.cal em{font-style:normal;font-size:11.5px;color:var(--muted);display:block;margin-top:2px}
+.bp{display:block;padding:11px 0;border-top:1px solid var(--line)}
+.bp:hover b{color:var(--cyan)}
+.bp b{font-size:13px;font-weight:600;line-height:1.4;display:block;transition:.15s}
+.bp small{font-size:11px;color:var(--dim)}
+.disc{font-size:11px;color:var(--dim);line-height:1.6;padding:4px 6px 20px}
+/* blog */
+.bhead{padding:2px 4px 18px}
+.bhead h2{font-size:26px;font-weight:800;letter-spacing:-.6px}
+.bhead h2 i{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bhead p{color:var(--muted);margin-top:6px;line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.post{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;display:flex;flex-direction:column}
+.post:hover{transform:translateY(-3px);border-color:rgba(61,139,255,.4);box-shadow:0 16px 40px rgba(0,0,0,.35),0 0 30px rgba(61,139,255,.08)}
+.cov{height:118px;position:relative;overflow:hidden}
+.cov span{position:absolute;left:14px;bottom:10px;font-size:11px;font-weight:700;letter-spacing:1.2px;color:rgba(255,255,255,.85)}
+.pb{padding:16px 18px 18px}
+.pb h4{font-size:16.5px;font-weight:700;line-height:1.3;letter-spacing:-.2px}
+.pb p{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pb .mm{margin-top:12px;font-size:11.5px;color:var(--dim);display:flex;gap:10px}
+.art{max-width:760px;margin:0 auto}
+.art .cov{height:170px;border-radius:18px;margin-bottom:22px;border:1px solid var(--line)}
+.art h2{font-size:32px;line-height:1.18;font-weight:800;letter-spacing:-.9px}
+.art .am{display:flex;gap:10px;align-items:center;margin:14px 0 24px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.body{font-size:16px;line-height:1.75;color:var(--silver)}
+.body h2{font-size:20px;margin:30px 0 10px;color:var(--text);letter-spacing:-.3px}
+.body p{margin-bottom:16px}.body ul{margin:0 0 18px 20px}.body li{margin-bottom:8px}
+.body strong{color:var(--text)}
+.srcs{margin-top:28px;padding:18px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.srcs h5{font-size:11px;letter-spacing:1.4px;color:var(--dim);margin-bottom:8px}
+.srcs a{display:block;padding:7px 0;font-size:13.5px;color:var(--silver);border-top:1px solid var(--line)}
+.srcs a:hover{color:var(--cyan)}.srcs a small{color:var(--cyan);font-weight:700;margin-right:8px}
+.back{color:var(--cyan);font-weight:600;font-size:13px;margin-bottom:16px;display:inline-block}
+.cd{display:flex;gap:8px;margin:2px 0 12px}
+.cd div{flex:1;text-align:center;padding:10px 0 8px;border-radius:11px;background:var(--bg2);border:1px solid var(--line)}
+.cd b{display:block;font-size:24px;font-weight:700;line-height:1.1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cd small{font-size:9.5px;letter-spacing:1.4px;color:var(--dim);font-weight:700}
+.dbanner{display:flex;align-items:center;gap:20px;padding:18px 20px;margin-bottom:16px;border-radius:16px;background:var(--grad-soft);border:1px solid rgba(61,139,255,.3);flex-wrap:wrap}
+.dbanner h4{font-size:15px;font-weight:700}.dbanner p{font-size:12.5px;color:var(--muted);margin-top:3px;max-width:380px;line-height:1.5}
+.dbanner .cd{margin:0 0 0 auto;min-width:230px}
+.ftabs{display:flex;gap:6px;margin-bottom:16px}
+.ftabs button{padding:8px 15px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-weight:600;font-size:13px}
+.ftabs button.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 18px var(--glow)}
+.tg.d{background:var(--grad);color:#fff;border-color:transparent}
+.hide{display:none!important}
+@media(max-width:1180px){.main{grid-template-columns:minmax(0,1fr)}.rcol{display:none}.col{padding-right:28px}}
+@media(max-width:860px){
+  .app{grid-template-columns:1fr}.side{position:fixed;left:0;top:0;bottom:0;width:270px;z-index:50;transform:translateX(-100%);transition:.25s;box-shadow:var(--shadow)}
+  .side.open{transform:none}.burger{display:grid}.top{padding:14px 16px 10px}.ticker{margin:0 16px 12px}.col{padding:0 16px 24px}.clock{display:none}.hl{font-size:14px}.row{padding:14px 16px}
+}
+</style>
+<link rel="stylesheet" href="/x2.css">
+</head>
+<body>
+<div class="app">
+<aside class="side" id="side">
+  <div class="brand">
+    <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    <b>XRPL<i>TODAY</i></b>
+  </div>
+  <div class="sec" style="padding-top:6px">TERMINAL</div>
+  <button class="nav on" data-go="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h10M7 13h10M7 17h6"/></svg>News Terminal</button>
+  <button class="nav" data-go="blog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11l3 3v13H5z"/><path d="M9 11h6M9 15h6"/></svg>XRPLTODAY Blog<span class="bd">HOURLY</span></button>
+  <button class="nav" data-go="daily"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>BONSAI × LUMA<span class="bd">DAILY</span></button>
+  <button class="nav" data-go="squares"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>XRPL Squares<span class="bd">NEW</span></button>
+  <button class="nav" data-go="tokens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8.5 10.5h5a2 2 0 010 4h-5"/></svg>Token News<span class="bd">NEW</span></button>
+  <button class="nav" data-go="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Ledger Analytics<span class="bd">LIVE</span></button>
+  <button class="nav" data-go="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Escrow Calendar</button>
+  <div class="sec">FEEDS</div>
+  <button class="nav" data-tab="XRP"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 8l8 8M16 8l-8 8"/></svg>XRP News</button>
+  <button class="nav" data-tab="XRPL"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>XRP Ledger</button>
+  <button class="nav" data-tab="RLUSD"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.6-1-1.7-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.3 0-2.4-.5-3-1.5M12 6v2M12 16v2"/></svg>RLUSD Watch</button>
+  <button class="nav" data-tab="Global"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Global Coverage</button>
+  <div class="sec">TRACKERS</div>
+  <button class="nav" data-tab="Regulation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M5 7h14M5 7l-3 7a3.5 3.5 0 007 0zM19 7l-3 7a3.5 3.5 0 007 0z"/></svg>Regulation</button>
+  <button class="nav" data-tab="ETF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M4 19h16M8 15l4-5 3 3 5-7"/></svg>ETF Tracker</button>
+  <div class="sec">SPONSORED</div>
+  <div id="spons"></div>
+  <div class="grow"></div>
+  <div class="rsscard"><b>Never miss a brief</b><span>A new market brief is published every hour. Subscribe in any RSS reader.</span><a class="btn" href="/rss.xml" target="_blank" rel="noopener">Subscribe via RSS</a></div>
+  <div class="foot">Not financial advice. Headlines are aggregated from third-party publishers; XRPLTODAY is independent and not affiliated with Ripple.<br>© 2026 XRPLTODAY</div>
+  <div class="bon"><span>XRPLTODAY</span> · a <b>BONSAI</b> product</div>
+</aside>
+
+<div class="main">
+  <header class="top">
+    <button class="ib burger" id="burger" aria-label="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <h1 id="title">News Terminal</h1>
+    <div class="sp"></div>
+    <div class="clock mono" id="clock"></div>
+    <div class="live"><i></i>LIVE</div>
+    <button class="ib" id="theme" aria-label="Theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></button>
+  </header>
+  <div class="ticker"><div class="tk" id="tk"></div></div>
+
+  <section class="col" id="colL">
+    <div id="vNews">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" placeholder="Search XRP, RLUSD, SEC, ETF, Ripple, any language…" autocomplete="off"></div>
+      <div class="tabs" id="tabs"></div>
+      <div class="imp"><div class="seg" id="sort"><button class="on" data-s="latest">Latest</button><button data-s="top">Top</button></div></div>
+      <div class="stat"><span id="st">Connecting…</span><span id="cnt"></span></div>
+      <div class="feed" id="feed"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
+    </div>
+    <div id="vBlog" class="hide">
+      <div class="bhead"><h2>XRPLTODAY <i>Blog</i></h2><p>An original market brief on XRP, the XRP Ledger and RLUSD — generated automatically every hour from the live worldwide news stream, with every source linked.</p></div>
+      <div class="dbanner"><div><h4>Next BONSAI × LUMA daily</h4><p>One fresh feature on what we're building every 24 hours — saved to the archive below.</p></div><div class="cd" data-cd></div></div>
+      <div class="ftabs" id="ftabs"><button class="on" data-f="all">All</button><button data-f="d">BONSAI × LUMA Daily</button><button data-f="h">XRPL Hourly</button></div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div id="vPost" class="hide"></div>
+    <div id="vStats" class="hide"></div>
+    <div id="vAds" class="hide"></div>
+    <div id="vSquares" class="hide"></div>
+    <div id="vToken" class="hide"></div>
+    <div id="vTokens" class="hide"></div>
+  </section>
+
+  <aside class="rcol" id="colR">
+    <div class="card" id="cMkt"><h3>XRP Market</h3><div class="mono" style="color:var(--dim)">Loading…</div></div>
+    <div class="card" id="cLedger"></div>
+    <div class="card" id="cCal"></div>
+    <div class="card" id="cDaily"></div>
+    <div class="card" id="cBlog"></div>
+    <div class="disc">XRPLTODAY aggregates public headlines and generates automated summaries. Content is informational only, may contain errors, and is not investment advice. Always verify with the original source.</div>
+  </aside>
+</div>
+</div>
+
+<script>
+(function(){
+var TABS=['All','XRP','XRPL','RLUSD','Ripple','Regulation','ETF','Markets','Tokens','Global','Saved'];
+var S={items:[],tab:'All',q:'',min:0,sort:'latest',lim:100000,mkt:null,xrpl:null,ts:0,seen:null,blogs:[],view:'news',next:0,bf:'all'};
+window.XD=S;window.XDapi={go:function(p){go(p)},render:function(){renderFeed()},grid:function(){drawGrid()},tabs:drawTabs};
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function ago(t){var s=Math.max(0,(Date.now()-t)/1000);if(s<60)return 'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
+function money(n,d){if(n==null)return '—';return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})}
+function big(n){if(n==null)return '—';var a=Math.abs(n);if(a>=1e12)return '$'+(n/1e12).toFixed(2)+'T';if(a>=1e9)return '$'+(n/1e9).toFixed(2)+'B';if(a>=1e6)return '$'+(n/1e6).toFixed(1)+'M';return '$'+Math.round(n).toLocaleString()}
+function pct(n){if(n==null)return '<span>—</span>';return '<span class="'+(n>=0?'up':'down')+'">'+(n>=0?'▲ ':'▼ ')+Math.abs(n).toFixed(2)+'%</span>'}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){}return null}
+function api(p){return fetch(p,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+
+/* theme */
+var th=ls('xd_theme');if(th){document.documentElement.setAttribute('data-theme',th)}
+$('theme').onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);ls('xd_theme',n)};
+$('burger').onclick=function(){$('side').classList.toggle('open')};
+S.min=0
+function clock(){var d=new Date();$('clock').textContent=d.toISOString().slice(11,19)+' UTC'}
+setInterval(clock,1000);clock();
+
+/* tabs */
+function drawTabs(){$('tabs').innerHTML=TABS.map(function(t){return '<button class="'+(S.tab===t?'on':'')+'" data-t="'+t+'">'+t+'</button>'}).join('')}
+$('tabs').onclick=function(e){var b=e.target.closest('button');if(!b)return;S.tab=b.getAttribute('data-t');S.lim=100000;drawTabs();renderFeed();markNav()};
+$('q').oninput=function(){S.q=this.value.trim().toLowerCase();S.lim=100000;renderFeed()};
+function setRng(){}
+$('sort').onclick=function(e){var b=e.target.closest('button');if(!b)return;S.sort=b.getAttribute('data-s');var bs=this.children;for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i]===b);renderFeed()};
+
+/* feed */
+function visible(){
+  if(S.tab==='Saved'&&window.XD_saved)return window.XD_saved();
+  var q=S.q,t=S.tab,min=S.min;
+  var a=S.items.filter(function(it){
+    if(it.i<min)return false;
+    if(t==='Global'){if(!it.g)return false}else if(t!=='All'&&(it.c||[]).indexOf(t)<0)return false;
+    if(q&&(it.t+' '+it.s).toLowerCase().indexOf(q)<0)return false;return true});
+  if(S.sort==='top'){var cut=Date.now()-864e5;a=a.filter(function(x){return x.ts>cut}).sort(function(x,y){return y.i-x.i||y.ts-x.ts})}
+  return a}
+function renderFeed(){
+  var a=visible(),h='',n=Math.min(a.length,S.lim);
+  for(var i=0;i<n;i++){var it=a[i];
+    var tg=(it.c||[]).slice(0,2).map(function(c){return '<span class="tg">'+esc(c)+'</span>'}).join('');
+    if(it.g)tg+='<span class="tg g">'+esc(it.r)+'</span>';
+    var nw=S.seen&&!S.seen[it.id]?' new':'';
+    h+='<a data-id="'+esc(it.id)+'" class="row'+(it.i>=70?' hot':'')+nw+'" href="'+esc(it.u)+'" target="_blank" rel="noopener noreferrer">'+
+      '<div class="meta"><span class="age mono">'+ago(it.ts)+'</span><span class="src">'+esc(it.s)+'</span>'+(it.n>1?'<span class="more">+'+(it.n-1)+' sources</span>':'')+tg+'</div>'+
+      '<div class="hl">'+esc(it.t)+'</div>'+(it.im?'<img class="cvr" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="" src="'+esc(it.im)+'" onerror="this.remove()">':'<div class="cvr ph" data-cv="'+esc(it.u)+'"></div>')+'</a>'}
+  if(!a.length)h='<div class="empty">No stories match these filters yet.<br><small>Try another tab or clear the search.</small></div>';
+  if(a.length>n)h+='<button class="loadmore" id="lm">Show more ('+(a.length-n)+')</button>';
+  $('feed').innerHTML=h;$('cnt').textContent=a.length+' stories';
+  var lm=$('lm');if(lm)lm.onclick=function(){S.lim+=100000;renderFeed()};if(window.XD_rf)window.XD_rf()}
+function stat(){if(!S.ts)return;var s=Math.round((Date.now()-S.ts)/1000);$('st').innerHTML='<b>LIVE</b> · feed updated '+(s<90?s+'s':Math.round(s/60)+'m')+' ago · '+S.items.length+' stories · 21 regions'}
+setInterval(function(){stat();var r=document.querySelectorAll('.row .age');var a=S.view==='news'?visible():[];for(var i=0;i<r.length&&i<a.length;i++)r[i].textContent=ago(a[i].ts)},15000);
+
+/* right panel */
+function spark(v,w,h){if(!v||v.length<2)return '';var mn=Math.min.apply(null,v),mx=Math.max.apply(null,v),r=(mx-mn)||1,p=v.map(function(y,i){return (i/(v.length-1)*w).toFixed(1)+','+(h-3-((y-mn)/r)*(h-8)).toFixed(1)});
+  var up=v[v.length-1]>=v[0];var c=up?'#35d6a0':'#ff5d73';
+  return '<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="'+h+'" preserveAspectRatio="none"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c+'" stop-opacity=".32"/><stop offset="1" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs><polygon points="0,'+h+' '+p.join(' ')+' '+w+','+h+'" fill="url(#sg)"/><polyline points="'+p.join(' ')+'" fill="none" stroke="'+c+'" stroke-width="2" stroke-linejoin="round"/></svg>'}
+function find(id){var m=S.mkt||[];for(var i=0;i<m.length;i++)if(m[i].id===id)return m[i];return null}
+function drawMkt(){
+  var x=find('ripple'),r=find('ripple-usd'),b=find('bitcoin');
+  if(!x){$('cMkt').innerHTML='<h3>XRP Market</h3><div style="color:var(--muted)">Market data temporarily unavailable.</div>';return}
+  var ch=function(l,v){return '<span class="chip '+(v>=0?'u':'d')+'"><small>'+l+'</small>'+(v==null?'—':(v>=0?'+':'')+v.toFixed(2)+'%')+'</span>'};
+  $('cMkt').innerHTML='<h3>XRP Market<a href="https://www.coingecko.com/en/coins/xrp" target="_blank" rel="noopener">CoinGecko ↗</a></h3>'+
+   '<div class="px mono">'+money(x.p,x.p<10?4:2)+'</div><div class="chips">'+ch('1H',x.c1)+ch('24H',x.c24)+ch('7D',x.c7)+'</div>'+spark(x.sp,340,74)+
+   '<div class="kv"><div><small>7D RANGE</small><b class="mono">'+(x.sp&&x.sp.length?money(Math.min.apply(null,x.sp),3)+' – '+money(Math.max.apply(null,x.sp),3):'—')+'</b></div><div><small>24H VOLUME</small><b class="mono">'+big(x.v)+'</b></div></div>'+
+   (r?'<div class="mini" style="margin-top:12px"><span>RLUSD</span><b class="mono">'+money(r.p,4)+(r.mc?' · '+big(r.mc):'')+'</b></div>':'')+
+   (b?'<div class="mini"><span>BTC</span><b class="mono">'+money(b.p,0)+' '+pct(b.c24)+'</b></div>':'')}
+function drawLedger(){var l=S.xrpl;
+  $('cLedger').innerHTML='<h3>XRP Ledger<a href="https://livenet.xrpl.org" target="_blank" rel="noopener">Explorer ↗</a></h3>'+(l?
+   '<div class="kv"><div><small>VALIDATED LEDGER</small><b class="mono">#'+Number(l.seq).toLocaleString()+'</b></div><div><small>BASE FEE</small><b class="mono">'+l.fee+' XRP</b></div><div><small>RESERVE</small><b class="mono">'+l.res+' XRP</b></div><div><small>STATE</small><b class="up">'+esc(l.state&&l.state!=='proxying'?l.state:'validated')+'</b></div></div>':'<div style="color:var(--muted)">Ledger stats unavailable.</div>')}
+function drawCal(){
+  var n=new Date(),h='<h3>Escrow Calendar<span style="font-size:11px;color:var(--dim);font-weight:500">UTC</span></h3>';
+  var mo=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  for(var i=0;i<4;i++){var d=new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth()+1+i,1));var days=Math.ceil((d-n)/864e5);
+    h+='<div class="cal'+(i===0?' nx':'')+'"><div class="d"><small>'+mo[d.getUTCMonth()]+'</small><b>'+d.getUTCDate()+'</b></div><div><p>Ripple escrow unlock</p><em>Up to 1B XRP scheduled · in '+days+' day'+(days===1?'':'s')+'</em></div></div>'}
+  $('cCal').innerHTML=h}
+function drawBlogCard(){var b=S.blogs.slice(0,3),m=60-new Date().getUTCMinutes();
+  $('cBlog').innerHTML='<h3>Latest Briefs<a href="#" id="allb">All posts →</a></h3>'+(b.length?b.map(function(p){return '<a class="bp" href="/blog/'+esc(p.slug)+'" data-post="'+esc(p.slug)+'"><b>'+esc(p.title)+'</b><small>'+ago(p.ts)+' ago</small></a>'}).join(''):'<div style="color:var(--muted)">First brief publishing shortly…</div>')+
+   '<div class="mini"><span>Next brief</span><b class="mono">~'+m+' min</b></div>';
+  var ab=$('allb');if(ab)ab.onclick=function(e){e.preventDefault();go('/blog')}}
+function ticker(){var a=['ripple','ripple-usd','bitcoin'],s='';
+  for(var i=0;i<a.length;i++){var c=find(a[i]);if(c)s+='<span><b>'+(c.id==='ripple'?'XRP':c.id==='bitcoin'?'BTC':'RLUSD')+'</b><span class="mono">'+money(c.p,c.p<10?4:2)+'</span>'+pct(c.c24)+'</span>'}
+  var hl=S.items.filter(function(x){return x.i>=55}).slice(0,6);for(i=0;i<hl.length;i++)s+='<span><b class="up">●</b>'+esc(hl[i].t.length>88?hl[i].t.slice(0,86)+'…':hl[i].t)+'</span>';
+  if(!s)s='<span>XRPLTODAY · live worldwide XRP, XRPL &amp; RLUSD news</span>';$('tk').innerHTML=s+s}
+
+/* blog */
+function cover(slug,tag){var h=0;for(var i=0;i<slug.length;i++)h=(h*31+slug.charCodeAt(i))>>>0;var a=205+h%30,b=a+22+(h>>3)%14,x=20+(h>>5)%60,y=10+(h>>9)%70;
+  return 'background:radial-gradient(circle at '+x+'% '+y+'%,hsla('+(b+10)+',100%,70%,.55),transparent 55%),radial-gradient(circle at '+(100-x)+'% '+(100-y)+'%,hsla('+a+',95%,52%,.7),transparent 60%),linear-gradient(135deg,#071027,hsl('+a+',80%,24%))'}
+function lab(p){return p.k==='d'?'BONSAI × LUMA · DAILY':(((p.tags&&p.tags[0])||'XRP').toUpperCase()+' · HOURLY BRIEF')}
+function rt(p){return Math.max(1,Math.round((p.w||300)/220))+' min read'}
+function cdHTML(){var ms=Math.max(0,S.next-Date.now()),h=Math.floor(ms/36e5),m=Math.floor(ms%36e5/6e4),x=Math.floor(ms%6e4/1e3),f=function(n){return n<10?'0'+n:''+n};
+  return '<div><b class="mono">'+f(h)+'</b><small>HRS</small></div><div><b class="mono">'+f(m)+'</b><small>MIN</small></div><div><b class="mono">'+f(x)+'</b><small>SEC</small></div>'}
+function tickCd(){if(!S.next)return;var h=cdHTML(),e=document.querySelectorAll('[data-cd]');for(var i=0;i<e.length;i++)e[i].innerHTML=h}
+function drawDaily(){var d=S.blogs.filter(function(b){return b.k==='d'})[0];
+  $('cDaily').innerHTML='<h3>BONSAI × LUMA Daily<a href="/daily" data-nav="/daily">Archive →</a></h3><div style="font-size:12px;color:var(--muted);margin:-6px 0 10px">Next feature drops in</div><div class="cd" data-cd></div>'+(d?'<a class="bp" href="/blog/'+esc(d.slug)+'" data-post="'+esc(d.slug)+'"><b>'+esc(d.title)+'</b><small>Latest · '+ago(d.ts)+' ago · '+rt(d)+'</small></a>':'<div style="color:var(--muted);font-size:12.5px">First daily feature arrives at the next 16:00 UTC drop.</div>');tickCd()}
+function drawGrid(){var g=$('grid');if(!S.blogs.length){g.innerHTML='<div class="empty" style="grid-column:1/-1">The first brief is being written — check back in a moment.</div>';return}
+  var l=S.blogs.filter(function(p){return S.bf==='all'||p.k===S.bf});
+  if(!l.length){g.innerHTML='<div class="empty" style="grid-column:1/-1">Nothing here yet — the next daily drops at 16:00 UTC.</div>';return}
+  g.innerHTML=l.slice(0,60).map(function(p){return '<a class="post" href="/blog/'+esc(p.slug)+'" data-post="'+esc(p.slug)+'"><div class="cov" style="'+cover(p.slug)+'"><span>'+esc(lab(p))+'</span></div><div class="pb"><h4>'+esc(p.title)+'</h4><p>'+esc(p.ex)+'</p><div class="mm"><span>'+new Date(p.ts).toUTCString().slice(5,22)+' UTC</span><span>'+rt(p)+'</span></div></div></a>'}).join('')}
+function setBF(f){S.bf=f;var b=$('ftabs').children;for(var i=0;i<b.length;i++)b[i].classList.toggle('on',b[i].getAttribute('data-f')===f)}
+$('ftabs').onclick=function(e){var b=e.target.closest('button');if(!b)return;setBF(b.getAttribute('data-f'));drawGrid()};
+function openPost(slug){$('vPost').innerHTML='<div class="art"><div class="empty">Loading…</div></div>';
+  api('/api/blog/'+encodeURIComponent(slug)).then(function(p){
+    document.title=p.title+' — XRPLTODAY';
+    $('vPost').innerHTML='<div class="art"><a class="back" href="/blog" data-nav="/blog">← All briefs</a><div class="cov" style="'+cover(slug)+'"><span>'+esc(lab(p))+'</span></div><h2>'+esc(p.title)+'</h2><div class="am"><span>'+new Date(p.ts).toUTCString().slice(0,22)+' UTC</span><span>'+rt(p)+'</span>'+(p.k==='d'?'<span class="tg d">Daily</span>':'')+(p.tags||[]).map(function(t){return '<span class="tg">'+esc(t)+'</span>'}).join('')+'</div><div class="body">'+p.html+'</div>'+
+     ((p.src||[]).length?'<div class="srcs"><h5>SOURCES</h5>'+p.src.map(function(s){return '<a href="'+esc(s.u)+'" target="_blank" rel="noopener noreferrer"><small>'+esc(s.s)+'</small>'+esc(s.t)+'</a>'}).join('')+'</div>':'')+
+     (p.k==='d'?'<div class="srcs"><h5>ABOUT THIS SERIES</h5><span style="font-size:13.5px;color:var(--muted);line-height:1.6">A new BONSAI × LUMA feature is published every 24 hours at 16:00 UTC, covering what we are building on and around the XRP Ledger.</span></div>':'')+'<p class="disc" style="padding:16px 0">Automatically generated. Not financial advice; verify details with the original publishers.</p></div>'
+  }).catch(function(){$('vPost').innerHTML='<div class="art"><a class="back" href="/blog" data-nav="/blog">← All briefs</a><div class="empty">Article not found.</div></div>'})}
+
+/* routing */
+function markNav(){var ns=document.querySelectorAll('.nav');for(var i=0;i<ns.length;i++){var n=ns[i],on=false,g=n.getAttribute('data-go'),t=n.getAttribute('data-tab');
+  if(g)on=(g==='news'&&S.view==='news'&&S.tab==='All')||(g==='blog'&&(S.view==='blog'||S.view==='post')&&S.bf!=='d'&&location.pathname!=='/daily')||(g==='daily'&&location.pathname==='/daily');if(t)on=S.view==='news'&&S.tab===t;n.classList.toggle('on',on)}}
+function show(v){S.view=v;$('vNews').classList.toggle('hide',v!=='news');$('vBlog').classList.toggle('hide',v!=='blog');$('vPost').classList.toggle('hide',v!=='post');$('vStats').classList.toggle('hide',v!=='stats');$('vAds').classList.toggle('hide',v!=='ads');$('vSquares').classList.toggle('hide',v!=='squares');$('vToken').classList.toggle('hide',v!=='token');$('vTokens').classList.toggle('hide',v!=='tokens');document.body.classList.toggle('stv',v==='stats'||v==='ads'||v==='squares'||v==='token'||v==='tokens');
+  $('title').textContent=v==='news'?'News Terminal':v==='stats'?'Ledger Analytics':v==='ads'?'Advertise':v==='squares'?'XRPL Squares':v==='token'?'Token':v==='tokens'?'Token News':'XRPLTODAY Blog';if(v!=='post')document.title='XRPLTODAY — Live XRP, XRPL & RLUSD News Terminal';$('colL').scrollTop=0;markNav();$('side').classList.remove('open');if(window.XD_show)window.XD_show(v)}
+function route(){var p=location.pathname;
+  if(p.indexOf('/blog/')===0){show('post');openPost(decodeURIComponent(p.slice(6)))}
+  else if(p==='/advertise'){show('ads');if(window.XD_ads)window.XD_ads()}
+  else if(p==='/tokens'||p.indexOf('/tokens/')===0){show('tokens');if(window.XD_tn)window.XD_tn(p.length>8?decodeURIComponent(p.slice(8)):'')}
+  else if(p.indexOf('/token/')===0){show('token');window.__tkfrom=window.__tkfrom||0;if(window.XD_token)window.XD_token(decodeURIComponent(p.slice(7)))}
+  else if(p==='/squares'){show('squares');if(window.XD_squares)window.XD_squares()}
+  else if(p==='/stats'){show('stats');if(window.XD_stats)window.XD_stats()}
+  else if(p==='/blog'||p==='/daily'){show('blog');setBF(p==='/daily'?'d':'all');drawGrid()}
+  else show('news')}
+function go(p){history.pushState(null,'',p);route()}
+window.onpopstate=route;
+document.addEventListener('click',function(e){
+  var a=e.target.closest('[data-post],[data-nav]');
+  if(a&&!e.metaKey&&!e.ctrlKey){e.preventDefault();var p=a.getAttribute('data-post');go(p?'/blog/'+p:a.getAttribute('data-nav'))}
+  var n=e.target.closest('.nav');if(!n)return;
+  var g=n.getAttribute('data-go'),t=n.getAttribute('data-tab');
+  if(g==='news'){S.tab='All';drawTabs();if(S.view!=='news')go('/');else{renderFeed();markNav()}}
+  else if(g==='blog')go('/blog');
+  else if(g==='stats')go('/stats');
+  else if(g==='squares')go('/squares');
+  else if(g==='tokens')go('/tokens');
+  else if(g==='daily')go('/daily');
+  else if(g==='cal'){if(S.view!=='news')go('/');$('colR').scrollTo({top:$('cCal').offsetTop-8,behavior:'smooth'});$('side').classList.remove('open')}
+  else if(t){S.tab=t;S.lim=100000;drawTabs();if(S.view!=='news')go('/');else{renderFeed();markNav()}$('side').classList.remove('open')}});
+
+/* data */
+function load(first){
+  api('/api/news').then(function(d){
+    var prev=S.seen;S.items=d.items||[];if(window.XD_pre)S.items=window.XD_pre(S.items,d);S.mkt=d.mkt;S.xrpl=d.xrpl;S.ts=d.ts;S.next=d.next||S.next;
+    if(first){S.seen=null}
+    renderFeed();var m={};S.items.forEach(function(x){m[x.id]=1});S.seen=m;
+    drawMkt();drawLedger();ticker();stat();if(window.XD_load)window.XD_load(d)
+  }).catch(function(){$('st').textContent='Reconnecting…'})}
+function loadBlogs(){api('/api/blogs').then(function(b){S.blogs=b;drawBlogCard();drawDaily();if(S.view==='blog')drawGrid()}).catch(function(){})}
+drawTabs();setRng();markNav();drawCal();drawDaily();setInterval(tickCd,1000);drawLedger();route();
+load(true);loadBlogs();
+setInterval(load,20000);setInterval(loadBlogs,120000);setInterval(drawBlogCard,30000);setInterval(drawCal,3600000);
+})();
+</script>
+<script src="/x2.js" defer></script>
+</body>
+</html>

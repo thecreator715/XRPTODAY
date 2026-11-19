@@ -1,0 +1,3 @@
+{ "name": "xrpldaily", "private": true, "type": "module",
+  "scripts": { "build": "node scripts/build.mjs", "deploy": "node scripts/build.mjs && wrangler deploy", "archive": "node scripts/archive.mjs" },
+  "devDependencies": { "wrangler": "^4" } }

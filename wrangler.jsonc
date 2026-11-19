@@ -1,0 +1,8 @@
+{
+  "name": "xrpldaily",
+  "main": "dist/worker.js",
+  "compatibility_date": "2025-09-01",
+  "kv_namespaces": [{ "binding": "KV", "id": "4e32b1c9d0ba4d28a79446601cff33e8" }],
+  "ai": { "binding": "AI" },
+  "triggers": { "crons": ["*/5 * * * *"] }
+}
