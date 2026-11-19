@@ -506,7 +506,7 @@ async function rss(env, u) {
   const items = list.map(b => '<item><title>' + esc(b.title) + '</title><link>' + o + '/blog/' + b.slug + '</link><guid isPermaLink="true">' + o + '/blog/' + b.slug + '</guid><pubDate>' + new Date(b.ts).toUTCString() + '</pubDate><category>' + (b.k === 'd' ? 'BONSAI x LUMA Daily' : 'XRPL Hourly Brief') + '</category><description>' + esc(b.ex) + '</description></item>').join('');
   return new Response('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>XRPLTODAY</title><link>' + o + '</link><description>Hourly XRP, XRPL and RLUSD briefs plus the daily BONSAI x LUMA feature.</description><language>en</language>' + items + '</channel></rss>', { headers: { 'content-type': 'application/rss+xml;charset=utf-8', 'cache-control': 'public, max-age=300' } });
 }
-async function page(env, u) {
+async function page(env, u, ua) {
   let h = HTML; const m = u.pathname.match(/^\/blog\/([^\/]+)$/), dflt = '<meta property="og:title" content="XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal"><meta property="og:type" content="website">';
   if (m) {
     const p = await env.KV.get('b:' + decodeURIComponent(m[1]), 'json');
@@ -520,6 +520,7 @@ async function page(env, u) {
     const sid = sm[1]; let it = null;
     for (const k of ['stocks', 'metals']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; it = l.find(x => String(x.id) === sid); if (it) break; }
     if (!it) { const nd = await env.KV.get('news', 'json').catch(() => null); it = nd && (nd.items || []).find(x => String(x.id) === sid); }
+    if (it && !it.im && /bot|twitter|facebook|slack|discord|telegram|whatsapp|linkedin|preview|embed/i.test(ua || '')) { const cr = await coverApi(env, new URL('/api/cover?u=' + encodeURIComponent(it.u), u.origin)).then(r => r.json()).catch(() => null); if (cr && cr.im) it = Object.assign({}, it, { im: cr.im }); }
     if (it) {
       const br = (await env.KV.get('mkb2:' + sid).catch(() => null)) || it.d || '', ds = esc(String(br).split(/KEY POINTS:/i)[0].replace(/\s+/g, ' ').trim().slice(0, 200) || (it.s + ' — summary on XRPLTODAY'));
       const mt = '<meta property="og:title" content="' + esc(it.t) + '"><meta property="og:description" content="' + ds + '"><meta property="og:type" content="article"><meta property="og:site_name" content="XRPLTODAY">' + (it.im ? '<meta property="og:image" content="' + esc(it.im) + '"><meta name="twitter:image" content="' + esc(it.im) + '"><meta name="twitter:card" content="summary_large_image">' : '<meta name="twitter:card" content="summary">') + '<meta name="twitter:title" content="' + esc(it.t) + '">';
@@ -670,7 +671,7 @@ export default {
       if (p === '/api/admin') return await admin(req, env);
       if (p === '/rss.xml') return await rss(env, u);
       if (p === '/robots.txt') return new Response('User-agent: *\nAllow: /\nSitemap: ' + u.origin + '/rss.xml\n');
-      return await page(env, u);
+      return await page(env, u, req.headers.get('user-agent') || '');
     } catch (e) { return J({ error: String(e.message || e) }, 500); }
   },
   async scheduled(ev, env, ctx) { await tick(env, false); } // awaited (not waitUntil): long AI writes must not be cut off
