@@ -405,7 +405,7 @@ box.addEventListener('click',function(e){var a=e.target.closest('a[data-slug]');
 function ap(C){try{
  var d=document,css='';
  if(C.customCss)css+=String(C.customCss);
- var nav={hideBlog:'blog',hideDaily:'daily',hideStats:'stats',hideSquares:'squares',hideTokens:'tokens',hideTop:'top',hideStocks:'stocks',hideMetals:'metals',hideAi:'ai',hideAdvertise:'ads',hideCal:'cal'},hid=[];
+ var nav={hideBlog:'blog',hideDaily:'daily',hideStats:'stats',hideSquares:'squares',hideTokens:'tokens',hideTop:'top',hideStocks:'stocks',hideMetals:'metals',hideAi:'ai',hideWorld:'world',hideAdvertise:'ads',hideCal:'cal'},hid=[];
  for(var k in nav)if(C[k]){css+='[data-go="'+nav[k]+'"]{display:none!important}';hid.push(nav[k])}
  if(C.hideSearch)css+='.search{display:none!important}';
  if(C.hideRight)css+='#colR{display:none!important}.main{grid-template-columns:minmax(0,1fr)!important}';

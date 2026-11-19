@@ -523,7 +523,7 @@ async function page(env, u, ua) {
   const sm = u.pathname.match(/^\/story\/([a-z0-9]+)$/i);
   if (sm) {
     const sid = sm[1]; let it = null;
-    for (const k of ['stocks', 'metals', 'ai']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; it = l.find(x => String(x.id) === sid); if (it) break; }
+    for (const k of ['stocks', 'metals', 'ai', 'world']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; it = l.find(x => String(x.id) === sid); if (it) break; }
     if (!it) { const nd = await env.KV.get('news', 'json').catch(() => null); it = nd && (nd.items || []).find(x => String(x.id) === sid); }
     if (it && !it.im && /bot|twitter|facebook|slack|discord|telegram|whatsapp|linkedin|preview|embed/i.test(ua || '')) { const cr = await coverApi(env, new URL('/api/cover?u=' + encodeURIComponent(it.u), u.origin)).then(r => r.json()).catch(() => null); if (cr && cr.im) it = Object.assign({}, it, { im: cr.im }); }
     if (it) {
@@ -585,6 +585,8 @@ async function coverApi(env, u) {
 const MK = {
   stocks: { q: ['stock market today', 'Wall Street stocks S&P 500 Nasdaq Dow', 'top stocks to watch earnings', 'Federal Reserve rates stocks'],
     d: [['CNBC', 'https://www.cnbc.com/id/100003114/device/rss/rss.html'], ['MarketWatch', 'https://feeds.content.dowjones.io/public/rss/mw_topstories'], ['Yahoo Finance', 'https://finance.yahoo.com/news/rssindex'], ['Investing.com', 'https://www.investing.com/rss/news_25.rss']] },
+  world: { q: ['world news today', 'breaking international news', 'global politics diplomacy', 'Middle East Europe Asia news'],
+    d: [['BBC News', 'https://feeds.bbci.co.uk/news/world/rss.xml'], ['Al Jazeera', 'https://www.aljazeera.com/xml/rss/all.xml'], ['The Guardian', 'https://www.theguardian.com/world/rss'], ['NPR', 'https://feeds.npr.org/1004/rss.xml']] },
   ai: { q: ['artificial intelligence news', 'OpenAI Anthropic Google Gemini AI models', 'AI chips Nvidia data center', 'generative AI regulation startups'],
     d: [['TechCrunch', 'https://techcrunch.com/category/artificial-intelligence/feed/'], ['The Verge', 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml'], ['VentureBeat', 'https://venturebeat.com/category/ai/feed/'], ['MIT Technology Review', 'https://www.technologyreview.com/topic/artificial-intelligence/feed']] },
   metals: { q: ['gold price', 'silver price', 'copper price', 'precious metals gold silver copper market'],
@@ -593,6 +595,7 @@ const MK = {
 function mkTags(k, t) {
   const c = [];
   if (k === 'ai') { if (/openai|chatgpt|gpt-?\d|sora/i.test(t)) c.push('OpenAI'); if (/anthropic|claude/i.test(t)) c.push('Anthropic'); if (/google|gemini|deepmind/i.test(t)) c.push('Google'); if (/nvidia|chip|gpu|semiconductor|data cent/i.test(t)) c.push('Chips'); if (/regulat|law|lawsuit|copyright|ban\b|policy|congress|\beu\b/i.test(t)) c.push('Policy'); if (/robot|agent|model|llm|startup|funding|raises/i.test(t)) c.push('Models'); if (!c.length) c.push('Other'); }
+  else if (k === 'world') { if (/election|president|minister|parliament|government|vote|congress|senate|diplomat|summit|treaty|sanction/i.test(t)) c.push('Politics'); if (/war|attack|strike|missile|troops|military|ceasefire|conflict|killed|hostage|drone/i.test(t)) c.push('Conflict'); if (/econom|trade|tariff|inflation|market|oil|gdp|bank|currency/i.test(t)) c.push('Economy'); if (/europe|\beu\b|uk\b|britain|france|german|ukraine|russia|nato/i.test(t)) c.push('Europe'); if (/china|japan|india|korea|taiwan|asia|pakistan|indonesia|philippines/i.test(t)) c.push('Asia'); if (/israel|gaza|iran|saudi|syria|lebanon|iraq|yemen|middle east|turkey|egypt/i.test(t)) c.push('Middle East'); if (/u\.s\.|\bus\b|america|canada|mexico|brazil|argentina|venezuela|trump|biden/i.test(t)) c.push('Americas'); if (/africa|nigeria|kenya|sudan|ethiopia|congo|south africa/i.test(t)) c.push('Africa'); if (!c.length) c.push('Other'); }
   else if (k === 'metals') { if (/gold/i.test(t)) c.push('Gold'); if (/silver/i.test(t)) c.push('Silver'); if (/copper/i.test(t)) c.push('Copper'); if (!c.length) c.push('Other'); }
   else { if (/s&p|nasdaq|dow\b|index|indices|wall street/i.test(t)) c.push('Indexes'); if (/earnings|revenue|profit|quarter|guidance|eps/i.test(t)) c.push('Earnings'); if (/nvidia|apple|microsoft|tesla|amazon|meta\b|google|alphabet|\bai\b|chip|semiconductor/i.test(t)) c.push('Tech'); if (/\bfed\b|federal reserve|powell|rate cut|inflation|cpi|treasury|yield/i.test(t)) c.push('Fed'); if (/surge|soar|plunge|jump|tumble|rally|slump|sink|spike|biggest|movers/i.test(t)) c.push('Movers'); }
   return c;
@@ -600,7 +603,7 @@ function mkTags(k, t) {
 async function storyApi(env, u) {
   const id = (u.searchParams.get('id') || '').replace(/[^a-z0-9]/gi, '').slice(0, 20); if (!id) return J({ error: 'id' }, 400);
   let it = null, kk = 'stocks';
-  for (const k of ['stocks', 'metals', 'ai']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; const f = l.find(x => String(x.id) === id); if (f) { it = f; kk = k; break; } }
+  for (const k of ['stocks', 'metals', 'ai', 'world']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; const f = l.find(x => String(x.id) === id); if (f) { it = f; kk = k; break; } }
   let nd = null; if (!it) { nd = await env.KV.get('news', 'json').catch(() => null); const f = nd && (nd.items || []).find(x => String(x.id) === id); if (f) { it = f; kk = 'news'; } }
   if (!it) return J({ error: 'not found' }, 404);
   const rel = (kk === 'news' ? (nd.items || []) : ((await env.KV.get('mkl:' + kk, 'json').catch(() => null)) || [])).filter(x => String(x.id) !== id && (x.c || []).some(c => (it.c || []).indexOf(c) >= 0)).slice(0, 6).map(x => ({ id: x.id, t: x.t, s: x.s, ts: x.ts }));
@@ -615,7 +618,7 @@ async function storyApi(env, u) {
   return J({ k: kk, id, t: it.t, s: it.s, u: it.u, ts: it.ts, im: it.im || '', c: it.c || [], brief, rel }, 200, { 'cache-control': 'public, max-age=120' });
 }
 async function mktApi(req, env, ctx, u) {
-  const k = ({ metals: 'metals', ai: 'ai' })[u.searchParams.get('k')] || 'stocks', cache = caches.default, ck = new Request(u.origin + '/api/mkt?k=' + k);
+  const k = ({ metals: 'metals', ai: 'ai', world: 'world' })[u.searchParams.get('k')] || 'stocks', cache = caches.default, ck = new Request(u.origin + '/api/mkt?k=' + k);
   const hit = await cache.match(ck); if (hit) return hit;
   const now = Date.now(), cfg = MK[k];
   const feeds = cfg.q.map(q => ({ url: 'https://www.bing.com/news/search?q=' + encodeURIComponent(q) + '&format=rss&setmkt=en-US', bing: 1, lg: 'en', r: 'US', nokw: 1 })).concat(cfg.d.map(d => ({ url: d[1], name: d[0], lg: 'en', r: 'WW', nokw: 1 })));
@@ -629,7 +632,7 @@ async function mktApi(req, env, ctx, u) {
 }
 /* ---------- site control (admin-managed settings) ---------- */
 const CTLK = { maint: 'b', maintMsg: 's', banner: 's', bannerType: 's', bannerLink: 's', bannerUntil: 's', bannerClose: 'b', customCss: 's', homePath: 's',
-  hideBlog: 'b', hideDaily: 'b', hideStats: 'b', hideSquares: 'b', hideTokens: 'b', hideTop: 'b', hideStocks: 'b', hideMetals: 'b', hideAi: 'b', hideAdvertise: 'b', hideCal: 'b',
+  hideBlog: 'b', hideDaily: 'b', hideStats: 'b', hideSquares: 'b', hideTokens: 'b', hideTop: 'b', hideStocks: 'b', hideMetals: 'b', hideAi: 'b', hideWorld: 'b', hideAdvertise: 'b', hideCal: 'b',
   hideSearch: 'b', hideRight: 'b', hideTicker: 'b',
   blockWords: 's', blockSrc: 's', blockIds: 's', maxItems: 'n', mktMax: 'n', maxAgeH: 'n', lowQ: 'b', needImg: 'b',
   aiOff: 'b', noHourly: 'b', noDaily: 'b', noBrief: 'b', briefExtra: 's', cacheSec: 'n', cronOff: 'b' };
@@ -660,7 +663,7 @@ async function ctlAdmin(b, env) {
   if (a === 'ctl-stats') {
     const o = {}; for (const [k, p] of [['briefs', 'mkb2:'], ['tokens', 'tk:'], ['posts', 'b:'], ['analytics_days', 'an:']]) { const l = await env.KV.list({ prefix: p, limit: 1000 }); o[k] = l.keys.length + (l.list_complete ? '' : '+'); }
     const n = await env.KV.get('news', 'json').catch(() => null); o.news_items = n ? (n.items || []).length : 0; o.news_age_min = n ? Math.round((Date.now() - n.ts) / 6e4) : null;
-    for (const k of ['stocks', 'metals', 'ai']) { const l = await env.KV.get('mkl:' + k, 'json').catch(() => null); o['feed_' + k] = l ? l.length : 0; }
+    for (const k of ['stocks', 'metals', 'ai', 'world']) { const l = await env.KV.get('mkl:' + k, 'json').catch(() => null); o['feed_' + k] = l ? l.length : 0; }
     return J(o);
   }
   return J({ error: 'bad ctl action' }, 400);
@@ -670,7 +673,7 @@ async function ttsApi(env, u) {
   const mk = b64 => { const bin = atob(b64), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Response(a, { headers: { 'content-type': 'audio/mpeg', 'cache-control': 'public, max-age=86400' } }); };
   const hit = await env.KV.get('mkv:' + id); if (hit) return mk(hit);
   if ((await ctlGet(env)).aiOff) return J({ error: 'off' }, 503);
-  let it = null; for (const k of ['stocks', 'metals', 'ai']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; it = l.find(x => String(x.id) === id); if (it) break; }
+  let it = null; for (const k of ['stocks', 'metals', 'ai', 'world']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; it = l.find(x => String(x.id) === id); if (it) break; }
   if (!it) { const nd = await env.KV.get('news', 'json').catch(() => null); it = nd && (nd.items || []).find(x => String(x.id) === id); }
   if (!it) return J({ error: 'not found' }, 404);
   const br = (await env.KV.get('mkb2:' + id).catch(() => null)) || it.d || '';
