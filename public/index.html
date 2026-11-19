@@ -387,6 +387,7 @@ function loadMk(k){if(window.XD_mk)return window.XD_mk(k);var e=document.createE
 function route(){var p=location.pathname;
   if(p.indexOf('/blog/')===0){show('post');openPost(decodeURIComponent(p.slice(6)))}
   else if(p==='/stocks'||p==='/metals'){show('mkt');loadMk(p.slice(1))}
+  else if(p.indexOf('/story/')===0){show('mkt');loadMk('story:'+decodeURIComponent(p.slice(7)))}
   else if(p==='/advertise'){show('ads');if(window.XD_ads)window.XD_ads()}
   else if(p==='/tokens'||p.indexOf('/tokens/')===0){show('tokens');if(window.XD_tn)window.XD_tn(p.length>8?decodeURIComponent(p.slice(8)):'')}
   else if(p.indexOf('/token/')===0){show('token');window.__tkfrom=window.__tkfrom||0;if(window.XD_token)window.XD_token(decodeURIComponent(p.slice(7)))}

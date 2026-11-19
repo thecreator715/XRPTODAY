@@ -558,3 +558,18 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
 #vMkt .stat{margin:14px 4px 8px}
 #vMkt .acts button.on{color:#ffd166}
 #vMkt .np{color:#7ab8ff;font-weight:700}
+
+/* v11 story pages */
+.mkart{max-width:900px;margin:0 auto;padding-bottom:50px}
+.mkhero{display:block;width:100%;aspect-ratio:16/8;max-height:380px;object-fit:cover;border-radius:20px;border:1px solid var(--line);margin:14px 0 20px;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.mkhero.fb{background:linear-gradient(135deg,hsl(var(--h,210) 60% 28%),hsl(calc(var(--h,210) + 50) 60% 14%))}
+.mkart h2{font-size:clamp(26px,3vw,38px);line-height:1.18;letter-spacing:-1px;margin:0 0 10px}
+.mkbrief p{font-size:17px;line-height:1.8;margin:0 0 16px}
+.mkcta{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}
+.mkrt{margin:26px 0 10px}
+.mkrel{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.mkrel a{border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:inherit;font-size:14px;line-height:1.4;display:flex;flex-direction:column;gap:6px;background:linear-gradient(160deg,rgba(255,255,255,.04),transparent 60%)}
+.mkrel a:hover{border-color:rgba(61,139,255,.55)}.mkrel small{color:var(--muted);font-size:11.5px}
+
+/* v12 sidebar pay card button on one line */
+.rsscard .btn{display:block;width:100%;box-sizing:border-box;white-space:nowrap;font-size:12px;letter-spacing:0;padding:10px 8px;text-align:center;overflow:hidden;text-overflow:ellipsis}

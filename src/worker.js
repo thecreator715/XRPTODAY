@@ -98,7 +98,7 @@ function parseRss(xml, f, now) {
     let im = (b.match(/<News:Image>\s*(?:<!\[CDATA\[)?\s*([^<\s\]]+)/i) || [])[1] || (b.match(/<media:(?:content|thumbnail)[^>]*?url=["']([^"']+)["']/i) || [])[1] || (b.match(/<enclosure[^>]*?url=["']([^"']+)["'][^>]*?type=["']image/i) || [])[1] || (b.match(/<enclosure[^>]*?type=["']image[^>]*?url=["']([^"']+)["']/i) || [])[1];
     if (!im) { const dd = dec(b); im = (dd.match(/<img[^>]+src=["']([^"']+)["']/i) || [])[1]; }
     if (im) { im = dec(im).trim(); if (im.indexOf('//') === 0) im = 'https:' + im; im = /^https?:\/\//i.test(im) ? im.replace(/^http:/i, 'https:').slice(0, 500) : ''; if (/gstatic\.com\/faviconV2|pixel|spacer|1x1/i.test(im)) im = ''; }
-    out.push({ id: hash(t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')), t, s, u, ts, r: f.r, g: f.lg !== 'en' ? 1 : 0, im: im || '' });
+    out.push({ id: hash(t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')), t, s, u, ts, r: f.r, g: f.lg !== 'en' ? 1 : 0, im: im || '', d: f.nokw ? dec(tag(b, 'description')).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 500) : undefined });
   }
   return out;
 }
@@ -569,15 +569,32 @@ function mkTags(k, t) {
   else { if (/s&p|nasdaq|dow\b|index|indices|wall street/i.test(t)) c.push('Indexes'); if (/earnings|revenue|profit|quarter|guidance|eps/i.test(t)) c.push('Earnings'); if (/nvidia|apple|microsoft|tesla|amazon|meta\b|google|alphabet|\bai\b|chip|semiconductor/i.test(t)) c.push('Tech'); if (/\bfed\b|federal reserve|powell|rate cut|inflation|cpi|treasury|yield/i.test(t)) c.push('Fed'); if (/surge|soar|plunge|jump|tumble|rally|slump|sink|spike|biggest|movers/i.test(t)) c.push('Movers'); }
   return c;
 }
+async function storyApi(env, u) {
+  const id = (u.searchParams.get('id') || '').replace(/[^a-z0-9]/gi, '').slice(0, 20); if (!id) return J({ error: 'id' }, 400);
+  let it = null, kk = 'stocks';
+  for (const k of ['stocks', 'metals']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; const f = l.find(x => String(x.id) === id); if (f) { it = f; kk = k; break; } }
+  if (!it) return J({ error: 'not found' }, 404);
+  const rel = ((await env.KV.get('mkl:' + kk, 'json').catch(() => null)) || []).filter(x => String(x.id) !== id && (x.c || []).some(c => (it.c || []).indexOf(c) >= 0)).slice(0, 6).map(x => ({ id: x.id, t: x.t, s: x.s, ts: x.ts }));
+  let brief = await env.KV.get('mkb:' + id);
+  if (!brief) {
+    const sys = 'You are a news-desk editor at XRPLTODAY. Write a short ORIGINAL brief in your own words about the story described. Use ONLY the headline and summary given. Do not invent facts, numbers, quotes or names. 80 to 120 words, plain text, two short paragraphs, no title, no bullet points, no advice to buy or sell. Do not copy phrases from the summary.';
+    const txt = await ai(env, sys, 'Headline: ' + it.t + '\nSource: ' + it.s + '\nPublisher summary: ' + (it.d || '(none)'), 320).catch(() => '');
+    brief = String(txt || '').replace(/\s+\n/g, '\n').trim().slice(0, 1200);
+    if (brief.length > 60) await env.KV.put('mkb:' + id, brief, { expirationTtl: 259200 }).catch(() => { }); else brief = '';
+  }
+  return J({ k: kk, id, t: it.t, s: it.s, u: it.u, ts: it.ts, im: it.im || '', c: it.c || [], brief, rel }, 200, { 'cache-control': 'public, max-age=120' });
+}
 async function mktApi(req, env, ctx, u) {
   const k = u.searchParams.get('k') === 'metals' ? 'metals' : 'stocks', cache = caches.default, ck = new Request(u.origin + '/api/mkt?k=' + k);
   const hit = await cache.match(ck); if (hit) return hit;
   const now = Date.now(), cfg = MK[k];
   const feeds = cfg.q.map(q => ({ url: 'https://www.bing.com/news/search?q=' + encodeURIComponent(q) + '&format=rss&setmkt=en-US', bing: 1, lg: 'en', r: 'US', nokw: 1 })).concat(cfg.d.map(d => ({ url: d[1], name: d[0], lg: 'en', r: 'WW', nokw: 1 })));
   const res = await Promise.all(feeds.map(f => pull(f, now))), seen = new Set(), items = [];
-  for (const r of res) for (const x of r || []) { if (seen.has(x.id) || now - x.ts > 48 * 36e5) continue; seen.add(x.id); items.push({ t: x.t, s: x.s, u: x.u, ts: x.ts, im: x.im, c: mkTags(k, x.t) }); }
+  for (const r of res) for (const x of r || []) { if (seen.has(x.id) || now - x.ts > 48 * 36e5) continue; seen.add(x.id); items.push({ id: x.id, d: x.d || '', t: x.t, s: x.s, u: x.u, ts: x.ts, im: x.im, c: mkTags(k, x.t) }); }
   items.sort((a, b) => b.ts - a.ts);
-  const r = new Response(JSON.stringify({ k, items: items.slice(0, 90), ts: now }), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'public, max-age=300' } });
+  const top = items.slice(0, 90), old = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || [], have = new Set(top.map(x => x.id)), keep = top.concat(old.filter(x => !have.has(x.id) && now - x.ts < 72 * 36e5)).slice(0, 300);
+  ctx.waitUntil(env.KV.put('mkl:' + k, JSON.stringify(keep), { expirationTtl: 259200 }).catch(() => { }));
+  const r = new Response(JSON.stringify({ k, items: top.map(x => ({ id: x.id, t: x.t, s: x.s, u: x.u, ts: x.ts, im: x.im, c: x.c })), ts: now }), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'public, max-age=300' } });
   ctx.waitUntil(cache.put(ck, r.clone())); return r;
 }
 /* ---------- traffic analytics ---------- */
@@ -612,6 +629,7 @@ export default {
     try {
       if (p === '/api/news') return await news(env, ctx);
       if (p === '/api/hit') return await hitApi(req, env, ctx);
+      if (p === '/api/story') return await storyApi(env, u);
       if (p === '/api/mkt') return await mktApi(req, env, ctx, u);
       if (p === '/mk.js') return new Response((await env.KV.get('mkjs')) || MKJS, { headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=120' } });
       if (p.indexOf('/api/sq/') === 0) return await sqApi(req, env, u, p);
