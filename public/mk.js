@@ -44,7 +44,7 @@ function bind(){var v=$('vMkt');
    if(a2==='star'){if(ST.saved[id])delete ST.saved[id];else ST.saved[id]=1;ss('x2mksv',ST.saved);b.classList.toggle('on',!!ST.saved[id]);if(ST.f==='Saved')paintFeed()}
    else if(a2==='link'){try{navigator.clipboard.writeText(it.u)}catch(x){}b.classList.add('on');setTimeout(function(){b.classList.remove('on')},900)}
    else if(a2==='open'){window.open(it.u,'_blank','noopener')}
-   else if(a2==='x'){window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(it.t+'\n\nView at XRPLTODAY.com\n'+META[ST.k].tag+' #XRPLTODAY\n\n'+location.origin+'/story/'+it.id+(it.u?'\n\n'+it.u:'')),'_blank','noopener')}
+   else if(a2==='x'){var xu='https://twitter.com/intent/tweet?text='+encodeURIComponent(it.t+'\n\nView at XRPLTODAY.com\n'+META[ST.k].tag+' #XRPLTODAY\n\n'+location.origin+'/story/'+it.id);if(window.XDshareX)window.XDshareX({t:it.t,s:it.s,im:it.im,x:(window.XD&&window.XD.mkt||[]).filter(function(m){return m.id==='ripple'})[0]},xu);else window.open(xu,'_blank','noopener')}
    return}
   var row=t.closest('a.row');if(row){var rid=row.getAttribute('data-id');ST.seen[rid]=1;ss('x2mkseen',ST.seen);row.classList.remove('new')}}}
 function load(manual){ST.loading=!ST.items.length;if(ST.loading&&$('mkfeed'))paintFeed();
@@ -57,7 +57,7 @@ function story(id){var v=$('vMkt');v.innerHTML='<div class="art mkart"><div clas
   var bk=d.k==='news'?'/':'/'+d.k;
   if(d.error){v.innerHTML='<div class="art mkart"><a class="back" href="/" data-nav="/">← Back to news</a><div class="empty">This story is no longer available.</div></div>';return}
   var lab=d.k==='world'?'World News':d.k==='ai'?'AI Top Stories':d.k==='metals'?'METALS':d.k==='stocks'?'Top Stock News':'XRPL News',su=location.origin+'/story/'+d.id,tags=d.k==='world'?'#WorldNews #Breaking':d.k==='ai'?'#AI #OpenAI #Anthropic':d.k==='metals'?'#Gold #Silver #Copper':d.k==='stocks'?'#Stocks':'#XRP #XRPL',
-  share='https://twitter.com/intent/tweet?text='+encodeURIComponent(d.t+'\n\nView at XRPLTODAY.com\n'+tags+' #XRPLTODAY\n\n'+su+(d.u?'\n\n'+d.u:''));
+  share='https://twitter.com/intent/tweet?text='+encodeURIComponent(d.t+'\n\nView at XRPLTODAY.com\n'+tags+' #XRPLTODAY\n\n'+su);
   document.title=d.t+' — XRPLTODAY';
   var b=String(d.brief||''),why='',kp=[],m=b.match(/WHY IT MATTERS:\s*([\s\S]*)$/i);if(m){why=m[1].trim();b=b.slice(0,m.index)}
   m=b.match(/KEY POINTS:\s*([\s\S]*)$/i);if(m){kp=m[1].split(/\n+/).map(function(x){return x.replace(/^[-•*\s]+/,'').trim()}).filter(Boolean).slice(0,5);b=b.slice(0,m.index)}
@@ -68,6 +68,7 @@ function story(id){var v=$('vMkt');v.innerHTML='<div class="art mkart"><div clas
   (kp.length?'<div class="mkkp"><h3>Key points</h3><ul>'+kp.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div>':'')+(why?'<div class="mkwhy"><h3>Why it matters</h3><p>'+esc(why)+'</p></div>':'')+
   '<p class="disc">Written by XRPLTODAY from the publisher’s headline and snippet, in our own words. Read the original for the full reporting. Not financial advice.</p>'+cta(0)+
   (d.rel&&d.rel.length?'<h3 class="mkrt">Related stories</h3><div class="mkrel">'+d.rel.map(function(r){return '<a href="/story/'+r.id+'" data-nav="/story/'+r.id+'"><small>'+esc(r.s)+' · '+ago(r.ts)+'</small>'+esc(r.t)+'</a>'}).join('')+'</div>':'')+'</div>';
+  var px=document.querySelector('.mkcta a[href^="https://twitter.com/intent"]');if(px)px.onclick=function(e){e.preventDefault();var hi=document.querySelector('.mkart img.mkhero');window.XDshareX?window.XDshareX({t:d.t,s:d.s,im:hi?hi.getAttribute('src'):d.im,x:(window.XD&&window.XD.mkt||[]).filter(function(m){return m.id==='ripple'})[0]},share):window.open(share,'_blank','noopener')};
   $('mkcp').onclick=function(){var b=this,ok=function(){b.textContent='Copied ✓';setTimeout(function(){b.textContent='Copy link'},2000)},fb=function(){try{var t=document.createElement('textarea');t.value=su;t.setAttribute('readonly','');t.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px';document.body.appendChild(t);t.focus();t.select();t.setSelectionRange(0,99999);var r=document.execCommand('copy');t.remove();if(r)ok();else if(navigator.share)navigator.share({url:su,title:d.t}).catch(function(){});else window.prompt('Copy this link',su)}catch(e){window.prompt('Copy this link',su)}};try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(su).then(ok,fb);else fb()}catch(x){fb()}};
   $('mkimg').onclick=function(){var b=this,hi=document.querySelector('.mkart img.mkhero'),T=function(m){window.XDtoast&&window.XDtoast(m)};b.disabled=true;var o=b.textContent;b.textContent='Making image…';
    var p=window.XDpng?window.XDpng({t:d.t,s:d.s,im:hi?hi.getAttribute('src'):d.im,x:(window.XD&&window.XD.mkt||[]).filter(function(m){return m.id==='ripple'})[0]}):null;if(!p){b.disabled=false;b.textContent=o;return}
