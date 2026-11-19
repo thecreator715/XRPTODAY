@@ -524,7 +524,7 @@ async function sqApi(req, env, u, p) {
   const H = { 'cache-control': 'public, max-age=30' }, q = u.searchParams;
   try {
     if (p === '/api/sq/ohlc') { const md5 = (q.get('md5') || '').replace(/[^a-f0-9]/gi, '').slice(0, 40), i = ['5m', '15m', '1h', '4h', '1d'].includes(q.get('i')) ? q.get('i') : '1h', n = Math.max(10, Math.min(300, +q.get('n') || 96)); if (!md5) return J({ error: 'md5' }, 400); const d = await sqGet('/v1/ohlc/' + md5 + '?interval=' + i + '&limit=' + n, 45); return J({ ohlc: d.ohlc || [] }, 200, H); }
-    if (p === '/api/img') {
+    if (p === '/api/sq/img') {
       const u = q.get('u') || ''; let U; try { U = new URL(u); } catch (e) { return J({ error: 'url' }, 400); }
       if (!/^https?:$/.test(U.protocol) || /^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|\[|0\.)/i.test(U.hostname) || !U.hostname.includes('.')) return J({ error: 'host' }, 400);
       const r = await fetch(U.toString(), { headers: { 'user-agent': 'Mozilla/5.0 XRPLTODAY' }, cf: { cacheTtl: 86400, cacheEverything: true } }).catch(() => null);

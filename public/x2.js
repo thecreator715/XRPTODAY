@@ -330,7 +330,7 @@ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.c
 (function(){
 function toast(m){if(window.XDtoast)window.XDtoast(m)}
 function wrap(c,t,x,y,w,lh,max){var ws=String(t).split(/\s+/),l='',n=0,i;for(i=0;i<ws.length;i++){var tt=l?l+' '+ws[i]:ws[i];if(c.measureText(tt).width>w&&l){c.fillText(l,x,y+n*lh);n++;l=ws[i];if(n>=max-1){var r=ws.slice(i).join(' ');while(c.measureText(r+'…').width>w&&r.length>1)r=r.slice(0,-1);c.fillText(r+(i<ws.length-1||r!==ws.slice(i).join(' ')?'…':''),x,y+n*lh);return}}else l=tt}c.fillText(l,x,y+n*lh)}
-function loadImg(u){return new Promise(function(ok){if(!u)return ok(null);var im=new Image();im.crossOrigin='anonymous';im.onload=function(){ok(im)};im.onerror=function(){ok(null)};im.src='/api/img?u='+encodeURIComponent(u)})}
+function loadImg(u){return new Promise(function(ok){if(!u)return ok(null);var im=new Image();im.crossOrigin='anonymous';im.onload=function(){ok(im)};im.onerror=function(){ok(null)};im.src='/api/sq/img?u='+encodeURIComponent(u)})}
 window.XDpng=function(it){
  return loadImg(it.im).then(function(im){
   var W=1200,H=675,cv=document.createElement('canvas');cv.width=W;cv.height=H;var c=cv.getContext('2d');
