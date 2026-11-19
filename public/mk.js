@@ -50,7 +50,7 @@ function load(manual){ST.loading=!ST.items.length;if(ST.loading&&$('mkfeed'))pai
  fetch('/api/mkt?k='+ST.k,{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){var n=d.items||[];if(ST.paused&&!manual&&ST.items.length){var old={};ST.items.forEach(function(x){old[x.u]=1});ST.pend=n.filter(function(x){return !old[x.u]}).length;stat();return}ST.items=n;ST.ts=Date.now();ST.loading=0;if($('mkfeed'))paintFeed()}).catch(function(){ST.loading=0;if($('mkfeed'))paintFeed()})}
 
 function story(id){var v=$('vMkt');v.innerHTML='<div class="art mkart"><div class="empty">Loading…</div></div>';try{speechSynthesis.cancel()}catch(e){}
- var pit=null;try{pit=(window.XD.items||[]).find(function(x){return String(x.id)===id})}catch(e){}
+ var pit=null;try{pit=((window.XD.items||[]).concat(ST.items||[])).find(function(x){return String(x.id)===id})}catch(e){}
  if(pit)v.innerHTML='<div class="art mkart"><a class="back" href="/" data-nav="/">← XRPL News</a>'+(pit.im?'<img class="mkhero" referrerpolicy="no-referrer" alt="" src="'+esc(pit.im)+'" onerror="this.remove()">':'')+'<h2>'+esc(pit.t)+'</h2><div class="am"><span>'+esc(pit.s)+'</span></div><div class="mkcta"><a class="btn2 pri" href="'+esc(pit.u)+'" target="_blank" rel="noopener noreferrer">Read the full story at '+esc(pit.s)+' ↗</a></div><div class="body mkbrief"><p class="mu">Writing the summary…</p></div></div>';
  fetch('/api/story?id='+encodeURIComponent(id)).then(function(r){return r.json()}).then(function(d){
   var bk=d.k==='news'?'/':'/'+d.k;

@@ -687,3 +687,9 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
 .mkart .w{transition:background .35s ease,color .35s ease,opacity .5s ease;border-radius:4px;padding:0 1px;margin:0 -1px}
 .mkart .w.rd{opacity:.5}
 .mkart .w.on{background:rgba(59,130,246,.38);color:#fff;box-shadow:0 0 0 2px rgba(59,130,246,.22);opacity:1}
+
+/* v23 center countdown */
+.dbanner{flex-direction:column!important;align-items:center!important;text-align:center}
+.dbanner p{margin-left:auto;margin-right:auto}
+.dbanner .cd{margin:12px auto 0!important;width:100%;max-width:340px;justify-content:center}
+@media(min-width:861px){.dbanner{flex-direction:row!important;text-align:left}.dbanner .cd{margin:0 0 0 auto!important;width:auto;min-width:230px}}
