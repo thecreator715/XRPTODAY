@@ -302,10 +302,26 @@ var _xl=window.XD_load;window.XD_load=function(d){_xl(d);try{enhMkt();var l=docu
  var vp=document.getElementById('vPost');if(vp)m2.observe(vp,{childList:true,subtree:true})})();
 /* v5f: one-line filter bar */
 (function(){function mv(){var tb=document.querySelector('.tbx'),sg=document.getElementById('sort'),imp=document.querySelector('.imp');if(!tb||!sg||sg.parentNode===tb)return;tb.insertBefore(sg,tb.firstChild);if(imp)imp.style.display='none'}mv();var n=0,iv=setInterval(function(){mv();if(++n>30)clearInterval(iv)},300)})();
-/* v5i: Token News in the main feed */
+/* v5i: XRPL Token News in the main feed */
 (function(){
- function toItems(ps){return ps.map(function(p){return {id:'tn:'+p.slug,u:location.origin+'/tokens/'+p.slug,t:p.title,s:'Token News · '+p.token,ts:p.ts,i:55,c:['Tokens','Sponsored'],n:1,g:0,r:'',im:''}})}
+ function toItems(ps){return ps.map(function(p){return {id:'tn:'+p.slug,u:location.origin+'/tokens/'+p.slug,t:p.title,s:'XRPL Token News · '+p.token,ts:p.ts,i:55,c:['Tokens','Sponsored'],n:1,g:0,r:'',im:''}})}
  var orig=window.XD_pre;
  window.XD_pre=function(items,d){var a=orig?orig(items,d):items,tn=window.__tnItems||[];if(!tn.length||a!==items&&a===S.items)return a;var ids={};a.forEach(function(x){ids[x.id]=1});return a.concat(tn.filter(function(x){return !ids[x.id]})).sort(function(x,y){return y.ts-x.ts})};
  fetch('/api/tn').then(function(r){return r.json()}).then(function(d){window.__tnItems=toItems(d.posts||[]);if(S.items&&S.items.length){var base=S.items.filter(function(x){return String(x.id).indexOf('tn:')!==0});S.items=window.XD_pre(base);if(A.render)A.render()}}).catch(function(){});
  document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a.row');if(!a||e.metaKey||e.ctrlKey||e.target.closest('.acts'))return;var h=a.getAttribute('href')||'';if(h.indexOf(location.origin+'/tokens/')===0){e.preventDefault();e.stopPropagation();A.go(h.slice(location.origin.length))}},true)})();
+
+/* v8 traffic beacon: visits, time on site, activity */
+(function(){try{if(navigator.doNotTrack==='1'||/^\/admin/.test(location.pathname))return;
+var R=function(){return Math.random().toString(36).slice(2,10)},vid=localStorage.getItem('xvid');if(!vid){vid=R()+R();localStorage.setItem('xvid',vid)}
+var sid=sessionStorage.getItem('xsid'),first=!sid;if(!sid){sid=R()+R();sessionStorage.setItem('xsid',sid)}
+function send(o){o.s=sid;o.vid=vid;var j=JSON.stringify(o);try{if(navigator.sendBeacon)navigator.sendBeacon('/api/hit',new Blob([j],{type:'text/plain'}));else fetch('/api/hit',{method:'POST',body:j,keepalive:true})}catch(e){}}
+var rf='';try{rf=document.referrer?new URL(document.referrer).host:''}catch(e){}if(rf===location.host)rf='';
+send({t:first?'v':'pv',p:location.pathname,rf:rf,dev:innerWidth<760?'m':'d'});
+var ps=history.pushState;history.pushState=function(){var r=ps.apply(this,arguments);setTimeout(function(){send({t:'pv',p:location.pathname})},60);return r};
+window.addEventListener('popstate',function(){setTimeout(function(){send({t:'pv',p:location.pathname})},60)});
+setInterval(function(){if(document.visibilityState==='visible')send({t:'p',d:30})},30000);
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a,button');if(!a)return;var h=a.getAttribute('href')||'',tx=(a.textContent||'').toLowerCase();
+ if(/^https?:/.test(h)&&h.indexOf(location.host)<0){try{send({t:'e',e:'out:'+new URL(h).host.replace(/^www\./,'')})}catch(x){}}
+ if(/post to x|telegram|reddit|share|copy link|copy/.test(tx)&&tx.length<30)send({t:'e',e:'share'});
+ if(a.getAttribute('data-nav')&&/^\/token\//.test(a.getAttribute('data-nav')))send({t:'e',e:'token-open'})},true)
+}catch(e){}})();

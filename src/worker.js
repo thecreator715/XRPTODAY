@@ -1,7 +1,7 @@
 // XRPLTODAY — live XRP / XRPL / RLUSD news terminal + hourly briefs + daily BONSAI x LUMA post
 // Bindings: KV (kv_namespace), AI (Workers AI), ADMIN_KEY (secret). Cron: */5 * * * *
 const HTML = __HTML__;
-const X2CSS = __X2CSS__, X2JS = __X2JS__, STATSJS = __STATSJS__, ADSJS = __ADSJS__, SQJS = __SQJS__, TKJS = __TKJS__, TNJS = __TNJS__, ADMHTML = __ADMHTML__;
+const X2CSS = __X2CSS__, X2JS = __X2JS__, STATSJS = __STATSJS__, ADSJS = __ADSJS__, SQJS = __SQJS__, TKJS = __TKJS__, TNJS = __TNJS__, MKJS = __MKJS__, ADMHTML = __ADMHTML__;
 const UA = { 'user-agent': 'Mozilla/5.0 (compatible; XRPLTODAYBot/1.0)', 'accept': 'application/rss+xml, application/xml, text/xml, */*' };
 const TTL = 72 * 36e5, MAXN = 500, DAILY_HOUR = 16; // daily BONSAI x LUMA post at 16:00 UTC
 let busy = false, lastErr = '';
@@ -88,7 +88,7 @@ function feedList() {
   return l;
 }
 function parseRss(xml, f, now) {
-  const out = [], re = /<item[\s>]([\s\S]*?)<\/item>/gi, kw = f.lg === 'en' ? KWE : KW; let m;
+  const out = [], re = /<item[\s>]([\s\S]*?)<\/item>/gi, kw = f.nokw ? /./ : f.lg === 'en' ? KWE : KW; let m;
   while ((m = re.exec(xml))) {
     const b = m[1]; let t = dec(tag(b, 'title')).replace(/<[^>]+>/g, '').trim(), u = dec(tag(b, 'link')) || (b.match(/<link[^>]*href="([^"]+)"/) || [])[1];
     const ts = Date.parse(tag(b, 'pubDate') || tag(b, 'dc:date') || ''); if (!t || !u || isNaN(ts) || ts > now + 6e5 || now - ts > TTL) continue;
@@ -437,7 +437,7 @@ async function news(env, ctx) {
 /* ---------- XRPL token news submissions (paid, admin-approved) ---------- */
 async function tnCfg(env) { return Object.assign({ addr: '', price: 50 }, (await env.KV.get('tncfg', 'json')) || {}); }
 async function tnAll(env) { return (await env.KV.get('tn', 'json')) || []; }
-function tnPub(s) { return { id: s.id, slug: s.slug, title: s.title, token: s.token, tslug: s.tslug || '', link: s.link || '', ts: s.apr || s.ts, ex: String(s.body).replace(/\s+/g, ' ').slice(0, 180) }; }
+function tnPub(s) { return { id: s.id, slug: s.slug, title: s.title, token: s.token, tslug: s.tslug || '', link: s.link || '', ts: s.apr || s.ts, ex: String(s.body).replace(/\s+/g, ' ').slice(0, 260), name: s.name || '', tx: s.tx || '' }; }
 async function tnVerify(tx, cfg) {
   if (!cfg.addr) return { paid: false, why: 'No payment address configured' };
   const r = await fetch('https://s1.ripple.com:51234/', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ method: 'tx', params: [{ transaction: tx, binary: false }] }) }).then(x => x.json()).catch(() => null);
@@ -489,6 +489,7 @@ async function admin(req, env) {
   }
   if (b.action === 'remove') { const n = facts.filter(f => f.id !== b.id); await env.KV.put('facts', JSON.stringify(n)); return J({ ok: 1, left: n.length }); }
   if (/^ad-/.test(b.action || '')) return await adsAdmin(b, env);
+  if (b.action === 'an-get') return await anGet(b, env);
   if (/^tn-/.test(b.action || '')) return await tnAdmin(b, env);
   if (b.action === 'daily') return J(await daily(env, true));
   if (b.action === 'delete-post' && b.slug) { await env.KV.delete('b:' + b.slug); const l = ((await env.KV.get('blogs', 'json')) || []).filter(x => x.slug !== b.slug); await env.KV.put('blogs', JSON.stringify(l)); return J({ ok: 1 }); }
@@ -513,7 +514,7 @@ async function page(env, u) {
     else h = h.replace('<!--META-->', () => dflt);
   } else h = h.replace('<!--META-->', () => dflt);
   const tm = u.pathname.match(/^\/token\/([^\/]+)$/); if (tm) { const nm = esc(decodeURIComponent(tm[1]).slice(0, 60)); h = h.replace(/<title>[\s\S]*?<\/title>/, () => '<title>' + nm + ' token price, chart & analytics — XRPLTODAY</title>').replace('<meta property="og:title" content="XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal">', () => '<meta property="og:title" content="' + nm + ' — live chart & analytics on XRPLTODAY"><meta name="twitter:card" content="summary">'); }
-  const tn2 = u.pathname.match(/^\/tokens\/([^\/]+)$/); if (tn2) { const all2 = (await env.KV.get('tn', 'json')) || [], s2 = all2.find(x => x.slug === decodeURIComponent(tn2[1]) && x.status === 'approved'); if (s2) h = h.replace(/<title>[\s\S]*?<\/title>/, () => '<title>' + esc(s2.title) + ' — XRPLTODAY Token News</title>').replace('<meta property="og:title" content="XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal">', () => '<meta property="og:title" content="' + esc(s2.title) + '"><meta property="og:description" content="' + esc(String(s2.body).replace(/\s+/g, ' ').slice(0, 200)) + '"><meta property="og:type" content="article"><meta name="twitter:card" content="summary">'); }
+  const tn2 = u.pathname.match(/^\/tokens\/([^\/]+)$/); if (tn2) { const all2 = (await env.KV.get('tn', 'json')) || [], s2 = all2.find(x => x.slug === decodeURIComponent(tn2[1]) && x.status === 'approved'); if (s2) h = h.replace(/<title>[\s\S]*?<\/title>/, () => '<title>' + esc(s2.title) + ' — XRPLTODAY XRPL Token News</title>').replace('<meta property="og:title" content="XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal">', () => '<meta property="og:title" content="' + esc(s2.title) + '"><meta property="og:description" content="' + esc(String(s2.body).replace(/\s+/g, ' ').slice(0, 200)) + '"><meta property="og:type" content="article"><meta name="twitter:card" content="summary">'); }
   return new Response(h, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'public, max-age=60' } });
 }
 /* ---- XRPL Squares: token data proxy (xrpl.to) ---- */
@@ -554,11 +555,65 @@ async function coverApi(env, u) {
   } catch (e) { }
   const out = { im }; await env.KV.put(key, JSON.stringify(out), { expirationTtl: im ? 604800 : 86400 }); return J(out, 200, H);
 }
+
+/* ---------- markets news (stocks + metals) ---------- */
+const MK = {
+  stocks: { q: ['stock market today', 'Wall Street stocks S&P 500 Nasdaq Dow', 'top stocks to watch earnings', 'Federal Reserve rates stocks'],
+    d: [['CNBC', 'https://www.cnbc.com/id/100003114/device/rss/rss.html'], ['MarketWatch', 'https://feeds.content.dowjones.io/public/rss/mw_topstories'], ['Yahoo Finance', 'https://finance.yahoo.com/news/rssindex'], ['Investing.com', 'https://www.investing.com/rss/news_25.rss']] },
+  metals: { q: ['gold price', 'silver price', 'copper price', 'precious metals gold silver copper market'],
+    d: [['Kitco', 'https://www.kitco.com/rss/'], ['Investing.com', 'https://www.investing.com/rss/news_11.rss'], ['Mining.com', 'https://www.mining.com/feed/']] }
+};
+function mkTags(k, t) {
+  const c = [];
+  if (k === 'metals') { if (/gold/i.test(t)) c.push('Gold'); if (/silver/i.test(t)) c.push('Silver'); if (/copper/i.test(t)) c.push('Copper'); if (!c.length) c.push('Other'); }
+  else { if (/s&p|nasdaq|dow\b|index|indices|wall street/i.test(t)) c.push('Indexes'); if (/earnings|revenue|profit|quarter|guidance|eps/i.test(t)) c.push('Earnings'); if (/nvidia|apple|microsoft|tesla|amazon|meta\b|google|alphabet|\bai\b|chip|semiconductor/i.test(t)) c.push('Tech'); if (/\bfed\b|federal reserve|powell|rate cut|inflation|cpi|treasury|yield/i.test(t)) c.push('Fed'); if (/surge|soar|plunge|jump|tumble|rally|slump|sink|spike|biggest|movers/i.test(t)) c.push('Movers'); }
+  return c;
+}
+async function mktApi(req, env, ctx, u) {
+  const k = u.searchParams.get('k') === 'metals' ? 'metals' : 'stocks', cache = caches.default, ck = new Request(u.origin + '/api/mkt?k=' + k);
+  const hit = await cache.match(ck); if (hit) return hit;
+  const now = Date.now(), cfg = MK[k];
+  const feeds = cfg.q.map(q => ({ url: 'https://www.bing.com/news/search?q=' + encodeURIComponent(q) + '&format=rss&setmkt=en-US', bing: 1, lg: 'en', r: 'US', nokw: 1 })).concat(cfg.d.map(d => ({ url: d[1], name: d[0], lg: 'en', r: 'WW', nokw: 1 })));
+  const res = await Promise.all(feeds.map(f => pull(f, now))), seen = new Set(), items = [];
+  for (const r of res) for (const x of r || []) { if (seen.has(x.id) || now - x.ts > 48 * 36e5) continue; seen.add(x.id); items.push({ t: x.t, s: x.s, u: x.u, ts: x.ts, im: x.im, c: mkTags(k, x.t) }); }
+  items.sort((a, b) => b.ts - a.ts);
+  const r = new Response(JSON.stringify({ k, items: items.slice(0, 90), ts: now }), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'public, max-age=300' } });
+  ctx.waitUntil(cache.put(ck, r.clone())); return r;
+}
+/* ---------- traffic analytics ---------- */
+const BOTUA = /bot|spider|crawl|slurp|facebookexternalhit|preview|headless|monitor|lighthouse|curl|wget/i;
+async function hitApi(req, env, ctx) {
+  const nc = () => new Response(null, { status: 204 });
+  if (req.method !== 'POST' || BOTUA.test(req.headers.get('user-agent') || '')) return nc();
+  let b; try { b = JSON.parse((await req.text()).slice(0, 2000)); } catch (e) { return nc(); }
+  const s = String(b.s || '').replace(/[^a-z0-9]/gi, '').slice(0, 20), vid = String(b.vid || '').replace(/[^a-z0-9]/gi, '').slice(0, 20), t = String(b.t || '');
+  if (!s || !/^(v|pv|p|e)$/.test(t)) return nc();
+  const now = Date.now(), dt = new Date(now), key = 'an:' + dt.toISOString().slice(0, 10);
+  const d = (await env.KV.get(key, 'json')) || { v: 0, u: 0, pv: 0, dur: 0, h: new Array(24).fill(0), pg: {}, rf: {}, ev: {}, dv: { m: 0, d: 0 }, vs: [], live: {} };
+  const inc = (o, k, n) => { if (!k) return; if (o[k] || Object.keys(o).length < 60) o[k] = (o[k] || 0) + (n || 1); };
+  const p = String(b.p || '/').split('?')[0].slice(0, 80);
+  if (t === 'v') { d.v++; if (vid && d.vs.indexOf(vid) < 0 && d.vs.length < 3000) { d.vs.push(vid); d.u++; } if (b.dev === 'm') d.dv.m++; else d.dv.d++; inc(d.rf, String(b.rf || '').slice(0, 60)); }
+  if (t === 'v' || t === 'pv') { d.pv++; d.h[dt.getUTCHours()]++; inc(d.pg, p); }
+  if (t === 'p') d.dur += Math.min(60, Math.max(0, +b.d || 0));
+  if (t === 'e') inc(d.ev, String(b.e || '').slice(0, 40));
+  d.live[s] = now; for (const k of Object.keys(d.live)) if (now - d.live[k] > 120000) delete d.live[k];
+  try { await env.KV.put(key, JSON.stringify(d), { expirationTtl: 86400 * 120 }); } catch (e) { }
+  return nc();
+}
+async function anGet(b, env) {
+  const n = Math.min(60, Math.max(1, +b.days || 30)), now = Date.now(), keys = [];
+  for (let i = n - 1; i >= 0; i--) keys.push(new Date(now - i * 864e5).toISOString().slice(0, 10));
+  const rows = await Promise.all(keys.map(k => env.KV.get('an:' + k, 'json')));
+  return J({ days: keys.map((k, i) => { const d = rows[i] || {}; return { d: k, v: d.v || 0, u: d.u || 0, pv: d.pv || 0, dur: d.dur || 0, h: d.h || [], pg: d.pg || {}, rf: d.rf || {}, ev: d.ev || {}, dv: d.dv || {}, live: Object.keys(d.live || {}).filter(x => now - d.live[x] < 90000).length }; }) }, 200, { 'cache-control': 'no-store' });
+}
 export default {
   async fetch(req, env, ctx) {
     const u = new URL(req.url), p = u.pathname;
     try {
       if (p === '/api/news') return await news(env, ctx);
+      if (p === '/api/hit') return await hitApi(req, env, ctx);
+      if (p === '/api/mkt') return await mktApi(req, env, ctx, u);
+      if (p === '/mk.js') return new Response((await env.KV.get('mkjs')) || MKJS, { headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=120' } });
       if (p.indexOf('/api/sq/') === 0) return await sqApi(req, env, u, p);
       if (p === '/token.js') return new Response((await env.KV.get('tkjs')) || TKJS, { headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=120' } });
       if (p === '/admin') return new Response((await env.KV.get('admhtml')) || ADMHTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow' } });
