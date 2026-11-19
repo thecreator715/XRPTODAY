@@ -126,15 +126,15 @@ var cvIO=window.IntersectionObserver?new IntersectionObserver(function(es){es.fo
 var _rf0=window.XD_rf;window.XD_rf=function(){if(_rf0)_rf0.apply(this,arguments);if(cvIO)document.querySelectorAll('#feed .cvr.ph:not([data-o])').forEach(function(p){p.setAttribute('data-o','1');p.style.setProperty('--h',cvHue(p));cvIO.observe(p)})};
 
 /* ---------- stat strip (market pulse) ---------- */
-function spk(v,w,h,c){if(!v||v.length<2)return '';var mn=Math.min.apply(null,v),mx=Math.max.apply(null,v),r=(mx-mn)||1,p=v.map(function(y,i){return (i/(v.length-1)*w).toFixed(1)+','+(h-2-((y-mn)/r)*(h-5)).toFixed(1)});return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"><polyline points="'+p.join(' ')+'" fill="none" stroke="'+c+'" stroke-width="1.8" stroke-linejoin="round"/></svg>'}
+function spk(v,w,h,c,id){if(!v||v.length<2)return '';var n=v.length,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v),r=(mx-mn)||1,W=200,H=48,pd=mx>mn?(mx-mn)*.08:1;mn-=pd;mx+=pd;r=mx-mn;var xy=v.map(function(y,i){return [i/(n-1)*W,H-((y-mn)/r)*H]}),pl=xy.map(function(q){return q[0].toFixed(1)+','+q[1].toFixed(1)}).join(' '),l=xy[n-1],g='sg'+id;return '<svg class="spk" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="'+g+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c+'" stop-opacity=".38"/><stop offset="1" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs><polygon points="0,'+H+' '+pl+' '+W+','+H+'" fill="url(#'+g+')"/><polyline points="'+pl+'" fill="none" stroke="'+c+'" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>'}
 var strip=el('div','strip');var vn=$('vNews');vn.insertBefore(strip,vn.firstChild);
 function mk(id){var m=S.mkt||[];for(var i=0;i<m.length;i++)if(m[i].id===id)return m[i];return null}
 function pc(v){return v==null?'—':'<span class="'+(v>=0?'up':'down')+'">'+(v>=0?'+':'')+v.toFixed(2)+'%</span>'}
 function sentiment(){var P=/surge|rally|approv|win|partner|launch|adopt|gain|bull|record|soar|jump|integrat|expan|upgrade|inflow|growth|breakout|rise|rebound|boost|settle|victory|green/i,N=/crash|plunge|lawsuit|sue|hack|ban|fall|drop|bear|sell-?off|fraud|dump|reject|delay|outflow|decline|slump|fear|probe|investigat|loss|warn|risk|exploit|scam/i,p=0,n=0,cut=Date.now()-864e5;rawItems.forEach(function(x){if(x.ts<cut||x.g)return;if(P.test(x.t))p++;if(N.test(x.t))n++});var t=p+n;return {p:p,n:n,score:t?Math.round(50+(p-n)/t*50):50}}
 function drawStrip(){var x=mk('ripple'),b=mk('bitcoin'),r=mk('ripple-usd'),sn=sentiment(),hot=rawItems.filter(function(i){return i.i>=70&&Date.now()-i.ts<864e5}).length,l=S.xrpl;
- var up=x&&x.sp&&x.sp[x.sp.length-1]>=x.sp[0];
- strip.innerHTML='<div class="tile"><small>XRP / USD</small><b>'+(x?'$'+x.p.toFixed(x.p<10?4:2):'—')+'</b><em>'+(x?pc(x.c24):'')+' 24h</em>'+(x?spk(x.sp,90,34,up?'#35d6a0':'#ff5d73'):'')+'</div>'+
- '<div class="tile"><small>BITCOIN</small><b>'+(b?'$'+Math.round(b.p).toLocaleString():'—')+'</b><em>'+(b?pc(b.c24):'')+' 24h</em>'+(b?spk(b.sp,90,34,'#59c6ff'):'')+'</div>'+
+ var up=x&&(x.c24!=null?x.c24>=0:(x.sp&&x.sp[x.sp.length-1]>=x.sp[0])),bu=b&&b.c24!=null?b.c24>=0:true;
+ strip.innerHTML='<div class="tile hs"><small>XRP / USD</small><b>'+(x?'$'+x.p.toFixed(x.p<10?4:2):'—')+'</b><em>'+(x?pc(x.c24):'')+' 24h</em>'+(x?spk(x.sp,0,0,up?'#35d6a0':'#ff5d73','x'):'')+'</div>'+
+ '<div class="tile hs"><small>BITCOIN</small><b>'+(b?'$'+Math.round(b.p).toLocaleString():'—')+'</b><em>'+(b?pc(b.c24):'')+' 24h</em>'+(b?spk(b.sp,0,0,bu?'#35d6a0':'#ff5d73','b'):'')+'</div>'+
  '<div class="tile"><small>NEWS SENTIMENT 24H</small><b>'+sn.score+'<span style="font-size:12px;color:var(--muted)"> / 100</span></b><em>'+sn.p+' bullish · '+sn.n+' bearish headlines</em></div>'+
  '<div class="tile"><small>LEDGER</small><b>'+(l?'#'+Number(l.seq).toLocaleString():'—')+'</b><em>'+hot+' high-impact stories today</em></div>'}
 

@@ -732,3 +732,9 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #tkpx2{font-size:.85rem;margin:2px 0}
 .tile em{font-style:normal}
 @media(max-width:759px){.tkbt{grid-template-columns:1fr 1fr}.tkbt #tksq{grid-column:1/-1;width:100%}}
+
+/* v27 market strip charts */
+.strip .tile.hs{padding-bottom:62px!important;min-height:132px}
+.strip .tile svg.spk{position:absolute;left:0;right:0;bottom:0;width:100%;height:50px;margin:0;opacity:1;filter:none;border-radius:0 0 16px 16px}
+.strip .tile .spd{position:absolute;right:-1px;bottom:0;width:7px;height:7px;border-radius:50%;margin:0;box-shadow:0 0 10px 2px currentColor;display:none}
+@media(max-width:700px){.strip .tile.hs{padding-bottom:56px!important;min-height:124px}.strip .tile svg.spk{height:44px}}
