@@ -665,6 +665,22 @@ async function ctlAdmin(b, env) {
   }
   return J({ error: 'bad ctl action' }, 400);
 }
+async function ttsApi(env, u) {
+  const id = (u.searchParams.get('id') || '').replace(/[^a-z0-9]/gi, '').slice(0, 20); if (!id) return J({ error: 'id' }, 400);
+  const mk = b64 => { const bin = atob(b64), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Response(a, { headers: { 'content-type': 'audio/mpeg', 'cache-control': 'public, max-age=86400' } }); };
+  const hit = await env.KV.get('mkv:' + id); if (hit) return mk(hit);
+  if ((await ctlGet(env)).aiOff) return J({ error: 'off' }, 503);
+  let it = null; for (const k of ['stocks', 'metals', 'ai']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; it = l.find(x => String(x.id) === id); if (it) break; }
+  if (!it) { const nd = await env.KV.get('news', 'json').catch(() => null); it = nd && (nd.items || []).find(x => String(x.id) === id); }
+  if (!it) return J({ error: 'not found' }, 404);
+  const br = (await env.KV.get('mkb2:' + id).catch(() => null)) || it.d || '';
+  const txt = (it.t + '. ' + String(br).replace(/KEY POINTS:/i, ' Key points. ').replace(/WHY IT MATTERS:/i, ' Why it matters. ').replace(/^\s*-\s*/gm, '').replace(/\s+/g, ' ')).slice(0, 1700);
+  try {
+    const r = await env.AI.run('@cf/myshell-ai/melotts', { prompt: txt, lang: 'en' }), b64 = typeof r === 'string' ? r : (r && r.audio);
+    if (!b64 || b64.length < 1000) return J({ error: 'tts' }, 502);
+    await env.KV.put('mkv:' + id, b64, { expirationTtl: 259200 }).catch(() => { }); return mk(b64);
+  } catch (e) { return J({ error: 'tts', m: String(e.message || e).slice(0, 80) }, 502); }
+}
 /* ---------- traffic analytics ---------- */
 const BOTUA = /bot|spider|crawl|slurp|facebookexternalhit|preview|headless|monitor|lighthouse|curl|wget/i;
 async function hitApi(req, env, ctx) {
@@ -696,6 +712,7 @@ export default {
     const u = new URL(req.url), p = u.pathname;
     try {
       if (p === '/api/news') return await news(env, ctx);
+      if (p === '/api/tts') return await ttsApi(env, u);
       if (p === '/api/cfg') return J(await ctlGet(env), 200, { 'cache-control': 'public, max-age=30' });
       if (p === '/api/hit') return await hitApi(req, env, ctx);
       if (p === '/api/story') return await storyApi(env, u);
