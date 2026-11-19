@@ -362,3 +362,40 @@ document.addEventListener('click',function(e){
  var im=firstImg();if(!im)return;
  e.preventDefault();window.XDshareX({t:q.split('\n\n')[0],s:(document.title||'XRPLTODAY').split('—')[0],im:im},url)},true);
 })();
+
+/* v18 multi search */
+(function(){
+var q=document.getElementById('q');if(!q||q.__ms)return;q.__ms=1;
+var box=document.createElement('div');box.id='msx';box.hidden=true;q.parentNode.appendChild(box);
+q.parentNode.style.position='relative';
+var tm=0,seq=0,cache={};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function hex2(h){var s='';try{for(var i=0;i<h.length;i+=2){var c=parseInt(h.substr(i,2),16);if(c)s+=String.fromCharCode(c)}}catch(e){}return /^[\x20-\x7e]{2,}$/.test(s)?s:''}
+function px(v){v=+v;if(!v)return'—';return '$'+(v>=1?v.toFixed(v>=100?2:4):v.toPrecision(3))}
+function pc(v){v=+v;if(!isFinite(v)||!v&&v!==0)return'';return '<i class="'+(v>=0?'up':'dn')+'">'+(v>=0?'▲ ':'▼ ')+Math.abs(v).toFixed(2)+'%</i>'}
+function local(t){var l=[];try{var d=JSON.parse(localStorage.getItem('x2top')||'null');if(d&&d.r)l=d.r}catch(e){}
+ if(window.__toptok)l=window.__toptok;var s=t.toLowerCase();return l.filter(function(x){return((x.name||'')+' '+(x.currency||'')+' '+(x.issuer||'')+' '+(x.slug||'')).toLowerCase().indexOf(s)>=0}).slice(0,8)}
+function draw(t,r,load){
+ var kind=/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(t)?'acct':/^[0-9A-Fa-f]{40}$/.test(t)?'hex':'';
+ var h='';
+ if(kind==='acct'){h+='<a class="ms" target="_blank" rel="noopener" href="https://xrpscan.com/account/'+esc(t)+'"><b>Account</b><span>'+esc(t.slice(0,8))+'…'+esc(t.slice(-6))+'</span><em>XRPScan ↗</em></a><a class="ms" target="_blank" rel="noopener" href="https://xrpl.to/address/'+esc(t)+'"><b>Wallet</b><span>View on xrpl.to</span><em>↗</em></a>'}
+ if(kind==='hex'){var n=hex2(t);h+='<div class="ms mh"><b>Currency hex</b><span>'+(n?esc(n):'no ASCII name')+'</span></div>'}
+ if(r&&r.length)h+='<div class="msh">Tokens</div>'+r.map(function(x){var nm=x.name||x.currency||'?',hx=/^[0-9A-F]{40}$/.test(x.currency||'')?hex2(x.currency):'';
+  return '<a class="ms" data-slug="'+esc(x.slug)+'" href="/token/'+encodeURIComponent(x.slug)+'"><b>'+esc(nm)+(x.verified?' ✓':'')+'</b><span>'+esc(hx&&hx!==nm?hx+' · ':'')+esc((x.issuer||'').slice(0,6))+'…'+esc((x.issuer||'').slice(-4))+'</span><em>'+px(x.usd)+' '+pc(x.pro24h)+'</em></a>'}).join('');
+ else if(!load&&!kind)h+='<div class="ms mh"><span>No tokens found. Try a name, currency code, 40-char hex, or issuer address.</span></div>';
+ if(load)h+='<div class="ms mh"><span>Searching…</span></div>';
+ h+='<div class="msf">Token data by <a href="https://xrpl.to" target="_blank" rel="noopener">xrpl.to</a> · accounts by <a href="https://xrpscan.com" target="_blank" rel="noopener">XRPScan</a></div>';
+ box.innerHTML=h;box.hidden=false}
+function run(t){var my=++seq;
+ var lc=local(t);draw(t,lc,1);
+ if(cache[t]){draw(t,cache[t]);return}
+ fetch('https://api.xrpl.to/v1/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({search:t,limit:8})})
+ .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
+ .then(function(d){if(my!==seq)return;var r=(d.tokens||[]).slice(0,8);cache[t]=r;draw(t,r)})
+ .catch(function(){if(my!==seq)return;draw(t,lc)})}
+q.addEventListener('input',function(){var t=this.value.trim();clearTimeout(tm);if(t.length<2){box.hidden=true;return}tm=setTimeout(function(){run(t)},300)});
+q.addEventListener('focus',function(){if(box.innerHTML&&q.value.trim().length>=2)box.hidden=false});
+document.addEventListener('click',function(e){if(!box.contains(e.target)&&e.target!==q)box.hidden=true});
+q.addEventListener('keydown',function(e){if(e.key==='Escape')box.hidden=true});
+box.addEventListener('click',function(e){var a=e.target.closest('a[data-slug]');if(!a)return;e.preventDefault();box.hidden=true;(window.XDapi&&window.XDapi.go)?window.XDapi.go('/token/'+encodeURIComponent(a.getAttribute('data-slug'))):(history.pushState(null,'',a.getAttribute('href')),dispatchEvent(new PopStateEvent('popstate')))});
+})();
