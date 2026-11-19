@@ -188,7 +188,7 @@ function openShare(it){var o=modal('','<button class="x" onclick="this.closest(\
 function briefing(){var a=rawItems.filter(function(x){return Date.now()-x.ts<12*36e5}).sort(function(a,b){return b.i-a.i||b.ts-a.ts}).slice(0,10);var txt=a.map(function(x,i){return (i+1)+'. '+x.t+' ('+x.s+')'}).join('\n');var o=modal('brief','<button class="x" onclick="this.closest(\'.ov\').remove()">✕</button><h2>Briefing — top 10 right now</h2><div class="sub">Highest-impact stories from the last 12 hours</div><ol>'+a.map(function(x){return '<li><a href="'+esc(x.u)+'" target="_blank" rel="noopener">'+esc(x.t)+'</a><small>'+esc(x.s)+'</small></li>'}).join('')+'</ol><div class="btns"><button class="btn2 pri" id="bc">Copy as text</button></div>');o.querySelector('#bc').onclick=function(){copy('XRPLTODAY briefing\n\n'+txt);toast('Briefing copied','ok')}}
 var tv=el('div');tv.id='tv';document.body.appendChild(tv);var tvT=null,tvI=0;
 function tvOn(){var a=rawItems.filter(function(x){return Date.now()-x.ts<24*36e5&&!x.g}).sort(function(a,b){return b.i-a.i}).slice(0,12);if(!a.length)return;tv.classList.add('on');try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}catch(e){}
- function d(){var it=a[tvI++%a.length],x=mk('ripple');tv.innerHTML='<button class="x" onclick="document.exitFullscreen&&document.fullscreenElement&&document.exitFullscreen();document.getElementById(\'tv\').classList.remove(\'on\')">✕</button><div class="th"><b>XRPL<span style="color:var(--cyan)">TODAY</span> · LIVE</b><span class="mono">'+new Date().toISOString().slice(11,19)+' UTC</span></div><div class="big"><small>'+esc(it.s.toUpperCase())+'</small><h1>'+esc(it.t)+'</h1><a class="tvpill" href="'+esc(it.u)+'" target="_blank" rel="noopener noreferrer">Go to the post <span>↗</span></a></div><div class="tk2"><span>XRP <b>'+(x?'$'+x.p.toFixed(4):'—')+'</b></span><span>24H <b>'+(x?(x.c24>=0?'+':'')+x.c24.toFixed(2)+'%':'—')+'</b></span><span>Story <b>'+((tvI-1)%a.length+1)+'/'+a.length+'</b></span></div>'}
+ function d(){var it=a[tvI++%a.length],x=mk('ripple');window.__tvit={t:it.t,s:it.s,u:it.u,im:it.im,x:x};tv.innerHTML='<button class="x" onclick="document.exitFullscreen&&document.fullscreenElement&&document.exitFullscreen();document.getElementById(\'tv\').classList.remove(\'on\')">✕</button><div class="th"><b>XRPL<span style="color:var(--cyan)">TODAY</span> · LIVE</b><span class="mono">'+new Date().toISOString().slice(11,19)+' UTC</span></div><div class="big"><small>'+esc(it.s.toUpperCase())+'</small><h1>'+esc(it.t)+'</h1><a class="tvpill" href="'+esc(it.u)+'" target="_blank" rel="noopener noreferrer">Go to the post <span>↗</span></a><button class="tvpill" id="tvx" style="margin-left:14px;border:0;cursor:pointer">Post screen to X <span>𝕏</span></button></div><div class="tk2"><span>XRP <b>'+(x?'$'+x.p.toFixed(4):'—')+'</b></span><span>24H <b>'+(x?(x.c24>=0?'+':'')+x.c24.toFixed(2)+'%':'—')+'</b></span><span>Story <b>'+((tvI-1)%a.length+1)+'/'+a.length+'</b></span></div>'}
  d();clearInterval(tvT);tvT=setInterval(function(){if(!tv.classList.contains('on'))return clearInterval(tvT);if(tv.matches(':hover'))return;d()},9000)}
 function tvOff(){tv.classList.remove('on');clearInterval(tvT);try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}}
 function zen(){document.body.classList.toggle('zen');toast(document.body.classList.contains('zen')?'Focus mode on — press F to exit':'Focus mode off')}
@@ -325,3 +325,39 @@ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.c
  if(/post to x|telegram|reddit|share|copy link|copy/.test(tx)&&tx.length<30)send({t:'e',e:'share'});
  if(a.getAttribute('data-nav')&&/^\/token\//.test(a.getAttribute('data-nav')))send({t:'e',e:'token-open'})},true)
 }catch(e){}})();
+
+/* v14 — share to X with the post image / TV-screen PNG */
+(function(){
+function toast(m){if(window.XDtoast)window.XDtoast(m)}
+function wrap(c,t,x,y,w,lh,max){var ws=String(t).split(/\s+/),l='',n=0,i;for(i=0;i<ws.length;i++){var tt=l?l+' '+ws[i]:ws[i];if(c.measureText(tt).width>w&&l){c.fillText(l,x,y+n*lh);n++;l=ws[i];if(n>=max-1){var r=ws.slice(i).join(' ');while(c.measureText(r+'…').width>w&&r.length>1)r=r.slice(0,-1);c.fillText(r+(i<ws.length-1||r!==ws.slice(i).join(' ')?'…':''),x,y+n*lh);return}}else l=tt}c.fillText(l,x,y+n*lh)}
+function loadImg(u){return new Promise(function(ok){if(!u)return ok(null);var im=new Image();im.crossOrigin='anonymous';im.onload=function(){ok(im)};im.onerror=function(){ok(null)};im.src='/api/img?u='+encodeURIComponent(u)})}
+window.XDpng=function(it){
+ return loadImg(it.im).then(function(im){
+  var W=1200,H=675,cv=document.createElement('canvas');cv.width=W;cv.height=H;var c=cv.getContext('2d');
+  var g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,'#060a13');g.addColorStop(1,'#0e1c38');c.fillStyle=g;c.fillRect(0,0,W,H);
+  var top=96,imgH=0;
+  if(im){imgH=300;var s=Math.max(W/im.width,imgH/im.height),w=im.width*s,h=im.height*s;c.save();c.beginPath();c.rect(0,top,W,imgH);c.clip();c.drawImage(im,(W-w)/2,top+(imgH-h)/2,w,h);var o=c.createLinearGradient(0,top,0,top+imgH);o.addColorStop(0,'rgba(6,10,19,.15)');o.addColorStop(1,'rgba(6,10,19,.95)');c.fillStyle=o;c.fillRect(0,top,W,imgH);c.restore()}
+  c.fillStyle='#fff';c.font='800 30px system-ui,Segoe UI,Arial';c.textBaseline='alphabetic';c.fillText('XRPL',48,62);var w1=c.measureText('XRPL').width;c.fillStyle='#59c6ff';c.fillText('TODAY',48+w1,62);var w2=c.measureText('TODAY').width;c.fillStyle='#fff';c.font='700 22px system-ui,Arial';c.fillText(' · LIVE',48+w1+w2,62);
+  c.fillStyle='#8fa0bd';c.font='22px ui-monospace,Menlo,monospace';c.textAlign='right';c.fillText(new Date().toISOString().slice(11,19)+' UTC',W-48,62);c.textAlign='left';
+  var y=top+imgH+(im?46:90);
+  c.fillStyle='#59c6ff';c.font='600 22px system-ui,Arial';c.fillText(String(it.s||'XRPL').toUpperCase(),48,y);
+  c.fillStyle='#fff';c.font='800 '+(im?46:60)+'px system-ui,Segoe UI,Arial';wrap(c,it.t||'',48,y+(im?58:76),W-96,im?54:70,im?3:5);
+  c.fillStyle='rgba(255,255,255,.06)';c.fillRect(0,H-72,W,72);
+  c.fillStyle='#c8d3e8';c.font='24px system-ui,Arial';var x=it.x;c.fillText('XRP '+(x?'$'+x.p.toFixed(4):'—')+'    24H '+(x?(x.c24>=0?'+':'')+x.c24.toFixed(2)+'%':'—'),48,H-27);
+  c.textAlign='right';c.fillStyle='#59c6ff';c.font='700 24px system-ui,Arial';c.fillText('XRPLTODAY.com',W-48,H-27);
+  return new Promise(function(ok){cv.toBlob(function(b){ok(b)},'image/png')})})};
+window.XDshareX=function(it,xurl){
+ var w=window.open(xurl,'_blank','noopener');var p=window.XDpng(it);
+ try{if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({'image/png':p})]).then(function(){toast('Image copied — paste it (Ctrl/Cmd+V) into your X post')},function(){p.then(dl)});return}}catch(e){}
+ p.then(dl);
+ function dl(b){if(!b)return;var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='xrpltoday-post.png';document.body.appendChild(a);a.click();a.remove();toast('Image saved — attach it to your X post')}};
+function firstImg(){var i=document.querySelector('#vPost .art img,#vPost img,.mkart .mkhero img,.mkart img,#vMkt .mkhero img');return i?(i.getAttribute('src')||''):''}
+document.addEventListener('click',function(e){
+ var a=e.target.closest&&e.target.closest('a[href^="https://twitter.com/intent/tweet"],#tvx');if(!a)return;
+ var it,url;
+ if(a.id==='tvx'){it=window.__tvit;if(!it)return;e.preventDefault();var tx=it.t+'\n\n'+(it.u||location.origin)+'\n\nView at XRPLTODAY.com #XRPL #XRP #XRPTODAY';window.XDshareX(it,'https://twitter.com/intent/tweet?text='+encodeURIComponent(tx));return}
+ if(a.closest('#vToken'))return;
+ url=a.getAttribute('href');var q=new URL(url).searchParams.get('text')||'';
+ var im=firstImg();if(!im)return;
+ e.preventDefault();window.XDshareX({t:q.split('\n\n')[0],s:(document.title||'XRPLTODAY').split('—')[0],im:im},url)},true);
+})();

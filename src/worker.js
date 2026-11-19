@@ -524,6 +524,14 @@ async function sqApi(req, env, u, p) {
   const H = { 'cache-control': 'public, max-age=30' }, q = u.searchParams;
   try {
     if (p === '/api/sq/ohlc') { const md5 = (q.get('md5') || '').replace(/[^a-f0-9]/gi, '').slice(0, 40), i = ['5m', '15m', '1h', '4h', '1d'].includes(q.get('i')) ? q.get('i') : '1h', n = Math.max(10, Math.min(300, +q.get('n') || 96)); if (!md5) return J({ error: 'md5' }, 400); const d = await sqGet('/v1/ohlc/' + md5 + '?interval=' + i + '&limit=' + n, 45); return J({ ohlc: d.ohlc || [] }, 200, H); }
+    if (p === '/api/img') {
+      const u = q.get('u') || ''; let U; try { U = new URL(u); } catch (e) { return J({ error: 'url' }, 400); }
+      if (!/^https?:$/.test(U.protocol) || /^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|\[|0\.)/i.test(U.hostname) || !U.hostname.includes('.')) return J({ error: 'host' }, 400);
+      const r = await fetch(U.toString(), { headers: { 'user-agent': 'Mozilla/5.0 XRPLTODAY' }, cf: { cacheTtl: 86400, cacheEverything: true } }).catch(() => null);
+      const ct = r && r.headers.get('content-type') || '';
+      if (!r || !r.ok || !/^image\//i.test(ct) || +(r.headers.get('content-length') || 0) > 6e6) return J({ error: 'img' }, 404);
+      return new Response(r.body, { headers: { 'content-type': ct, 'access-control-allow-origin': '*', 'cache-control': 'public, max-age=86400' } });
+    }
     if (p === '/api/sq/token') { const s = (q.get('slug') || '').replace(/[^A-Za-z0-9_.\-]/g, '').slice(0, 120); if (!s) return J({ error: 'slug' }, 400); const d = await sqGet('/v1/token/' + s, 60); return J({ token: d.token || null }, 200, H); }
     if (p === '/api/sq/tokens') { const ok = ['vol24hxrp', 'pro24h', 'marketcap', 'holders', 'trendingScore', 'dateon', 'pro7d', 'vol24h'], sort = ok.includes(q.get('sort')) ? q.get('sort') : 'vol24hxrp', dir = q.get('dir') === 'asc' ? 'asc' : 'desc', lim = Math.max(1, Math.min(200, +q.get('limit') || 100)), st = Math.max(0, +q.get('start') || 0); const d = await sqGet('/v1/tokens?start=' + st + '&limit=' + lim + '&sortBy=' + sort + '&sortType=' + dir, 60); return J({ tokens: d.tokens || [], total: d.total || 0 }, 200, H); }
     if (p === '/api/sq/search') {

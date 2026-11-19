@@ -620,3 +620,4 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
 @media(min-width:1100px) and (min-height:640px){#vToken .tkp2{height:calc(100vh - 112px);padding-bottom:0}#vToken .tkmain{overflow:hidden}}
 @media(max-width:1100px){#vToken .kp{grid-template-columns:repeat(4,minmax(0,1fr))}#vToken .tkmain{grid-template-columns:1fr}#vToken .tkch{min-height:320px}}
 @media(max-width:640px){#vToken .kp{grid-template-columns:repeat(2,minmax(0,1fr))}#vToken .tkpr b{font-size:21px}#vToken .tkid h2{font-size:18px}}
+#tv .tvpill{font:inherit}
