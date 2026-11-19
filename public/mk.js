@@ -44,7 +44,7 @@ function bind(){var v=$('vMkt');
    if(a2==='star'){if(ST.saved[id])delete ST.saved[id];else ST.saved[id]=1;ss('x2mksv',ST.saved);b.classList.toggle('on',!!ST.saved[id]);if(ST.f==='Saved')paintFeed()}
    else if(a2==='link'){try{navigator.clipboard.writeText(it.u)}catch(x){}b.classList.add('on');setTimeout(function(){b.classList.remove('on')},900)}
    else if(a2==='open'){window.open(it.u,'_blank','noopener')}
-   else if(a2==='x'){var xu='https://twitter.com/intent/tweet?text='+encodeURIComponent(it.t+'\n\nView at XRPLTODAY.com\n'+META[ST.k].tag+' #XRPLTODAY\n\n'+location.origin+'/story/'+it.id);if(window.XDshareX)window.XDshareX({t:it.t,s:it.s,im:it.im,x:(window.XD&&window.XD.mkt||[]).filter(function(m){return m.id==='ripple'})[0]},xu);else window.open(xu,'_blank','noopener')}
+   else if(a2==='x'){var xu='https://twitter.com/intent/tweet?text='+encodeURIComponent(it.t+'\n\n'+(it.u||location.origin+'/story/'+it.id)+'\n\nView at XRPLTODAY.com '+META[ST.k].tag+' #XRPLTODAY');if(window.XDshareX)window.XDshareX({t:it.t,s:it.s,im:it.im,x:(window.XD&&window.XD.mkt||[]).filter(function(m){return m.id==='ripple'})[0]},xu);else window.open(xu,'_blank','noopener')}
    return}
   var row=t.closest('a.row');if(row){var rid=row.getAttribute('data-id');ST.seen[rid]=1;ss('x2mkseen',ST.seen);row.classList.remove('new')}}}
 function load(manual){ST.loading=!ST.items.length;if(ST.loading&&$('mkfeed'))paintFeed();
@@ -57,7 +57,7 @@ function story(id){var v=$('vMkt');v.innerHTML='<div class="art mkart"><div clas
   var bk=d.k==='news'?'/':'/'+d.k;
   if(d.error){v.innerHTML='<div class="art mkart"><a class="back" href="/" data-nav="/">← Back to news</a><div class="empty">This story is no longer available.</div></div>';return}
   var lab=d.k==='world'?'World News':d.k==='ai'?'AI Top Stories':d.k==='metals'?'METALS':d.k==='stocks'?'Top Stock News':'XRPL News',su=location.origin+'/story/'+d.id,tags=d.k==='world'?'#WorldNews #Breaking':d.k==='ai'?'#AI #OpenAI #Anthropic':d.k==='metals'?'#Gold #Silver #Copper':d.k==='stocks'?'#Stocks':'#XRP #XRPL',
-  share='https://twitter.com/intent/tweet?text='+encodeURIComponent(d.t+'\n\nView at XRPLTODAY.com\n'+tags+' #XRPLTODAY\n\n'+su);
+  share='https://twitter.com/intent/tweet?text='+encodeURIComponent(d.t+'\n\n'+(d.u||su)+'\n\nView at XRPLTODAY.com '+tags+' #XRPLTODAY');
   document.title=d.t+' — XRPLTODAY';
   var b=String(d.brief||''),why='',kp=[],m=b.match(/WHY IT MATTERS:\s*([\s\S]*)$/i);if(m){why=m[1].trim();b=b.slice(0,m.index)}
   m=b.match(/KEY POINTS:\s*([\s\S]*)$/i);if(m){kp=m[1].split(/\n+/).map(function(x){return x.replace(/^[-•*\s]+/,'').trim()}).filter(Boolean).slice(0,5);b=b.slice(0,m.index)}
