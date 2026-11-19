@@ -552,3 +552,9 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
 #vStats .kp:not(.lvx):not(.lv) .tile em{display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:1100px){#vStats .kp:not(.lvx):not(.lv){grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:640px){#vStats .kp:not(.lvx):not(.lv){grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v10 markets pages = news terminal layout */
+#vMkt .tbx{margin:12px 0 0}
+#vMkt .stat{margin:14px 4px 8px}
+#vMkt .acts button.on{color:#ffd166}
+#vMkt .np{color:#7ab8ff;font-weight:700}
