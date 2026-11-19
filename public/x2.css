@@ -682,3 +682,8 @@ body.gv .feed .row .acts{position:absolute;bottom:12px;right:12px;top:auto;left:
 /* v19 mobile bottom fix */
 @supports(height:100dvh){.app,.main{height:100dvh}}
 @media(max-width:860px){.col,body.stv .col,body.stv #vSquares{padding-bottom:calc(120px + env(safe-area-inset-bottom))!important}.rcol{padding-bottom:120px}}
+
+/* v21 listen highlight */
+.mkart .w{transition:background .35s ease,color .35s ease,opacity .5s ease;border-radius:4px;padding:0 1px;margin:0 -1px}
+.mkart .w.rd{opacity:.5}
+.mkart .w.on{background:rgba(59,130,246,.38);color:#fff;box-shadow:0 0 0 2px rgba(59,130,246,.22);opacity:1}
