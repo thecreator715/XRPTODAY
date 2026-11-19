@@ -515,6 +515,17 @@ async function page(env, u) {
   } else h = h.replace('<!--META-->', () => dflt);
   const tm = u.pathname.match(/^\/token\/([^\/]+)$/); if (tm) { const nm = esc(decodeURIComponent(tm[1]).slice(0, 60)); h = h.replace(/<title>[\s\S]*?<\/title>/, () => '<title>' + nm + ' token price, chart & analytics — XRPLTODAY</title>').replace('<meta property="og:title" content="XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal">', () => '<meta property="og:title" content="' + nm + ' — live chart & analytics on XRPLTODAY"><meta name="twitter:card" content="summary">'); }
   const tn2 = u.pathname.match(/^\/tokens\/([^\/]+)$/); if (tn2) { const all2 = (await env.KV.get('tn', 'json')) || [], s2 = all2.find(x => x.slug === decodeURIComponent(tn2[1]) && x.status === 'approved'); if (s2) h = h.replace(/<title>[\s\S]*?<\/title>/, () => '<title>' + esc(s2.title) + ' — XRPLTODAY XRPL Token News</title>').replace('<meta property="og:title" content="XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal">', () => '<meta property="og:title" content="' + esc(s2.title) + '"><meta property="og:description" content="' + esc(String(s2.body).replace(/\s+/g, ' ').slice(0, 200)) + '"><meta property="og:type" content="article"><meta name="twitter:card" content="summary">'); }
+  const sm = u.pathname.match(/^\/story\/([a-z0-9]+)$/i);
+  if (sm) {
+    const sid = sm[1]; let it = null;
+    for (const k of ['stocks', 'metals']) { const l = (await env.KV.get('mkl:' + k, 'json').catch(() => null)) || []; it = l.find(x => String(x.id) === sid); if (it) break; }
+    if (!it) { const nd = await env.KV.get('news', 'json').catch(() => null); it = nd && (nd.items || []).find(x => String(x.id) === sid); }
+    if (it) {
+      const br = (await env.KV.get('mkb2:' + sid).catch(() => null)) || it.d || '', ds = esc(String(br).split(/KEY POINTS:/i)[0].replace(/\s+/g, ' ').trim().slice(0, 200) || (it.s + ' — summary on XRPLTODAY'));
+      const mt = '<meta property="og:title" content="' + esc(it.t) + '"><meta property="og:description" content="' + ds + '"><meta property="og:type" content="article"><meta property="og:site_name" content="XRPLTODAY">' + (it.im ? '<meta property="og:image" content="' + esc(it.im) + '"><meta name="twitter:image" content="' + esc(it.im) + '"><meta name="twitter:card" content="summary_large_image">' : '<meta name="twitter:card" content="summary">') + '<meta name="twitter:title" content="' + esc(it.t) + '">';
+      h = h.replace(/<title>[\s\S]*?<\/title>/, () => '<title>' + esc(it.t) + ' — XRPLTODAY</title>').replace('<meta property="og:title" content="XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal"><meta property="og:type" content="website">', () => mt);
+    }
+  }
   return new Response(h, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'public, max-age=60' } });
 }
 /* ---- XRPL Squares: token data proxy (xrpl.to) ---- */
