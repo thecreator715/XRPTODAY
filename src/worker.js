@@ -457,17 +457,18 @@ async function tnApi(req, env, u, p) {
     const b = await req.json().catch(() => null); if (!b || b.hp) return J({ error: 'Invalid submission' }, 400, nc);
     const ip = req.headers.get('cf-connecting-ip') || 'x', rk = 'tnrl:' + ip, n = +(await env.KV.get(rk)) || 0; if (n >= 5) return J({ error: 'Too many submissions from this connection. Try again later.' }, 429, nc);
     const S = (v, m) => String(v == null ? '' : v).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').trim().slice(0, m);
-    const s = { title: S(b.title, 120), token: S(b.token, 40), tslug: S(b.tslug, 120).replace(/[^A-Za-z0-9_.\-]/g, ''), link: S(b.link, 300), email: S(b.email, 120), tx: S(b.tx, 64).toLowerCase(), body: S(b.body, 6000), name: S(b.name, 80) };
+    const s = { title: S(b.title, 120), token: S(b.token, 40), tslug: S(b.tslug, 120).replace(/[^A-Za-z0-9_.\-]/g, ''), link: S(b.link, 300), email: S(b.email, 120), tx: S(b.tx, 64).toLowerCase(), body: S(b.body, 30000), name: S(b.name, 80) };
     if (s.title.length < 8) return J({ error: 'Title must be at least 8 characters.' }, 400, nc);
     if (!s.token) return J({ error: 'Token name is required.' }, 400, nc);
     if (s.body.length < 150) return J({ error: 'Please write at least 150 characters of news.' }, 400, nc);
     if (s.link && !/^https:\/\/[^\s]+$/i.test(s.link)) return J({ error: 'Link must start with https://' }, 400, nc);
-    if (!/^[a-f0-9]{64}$/.test(s.tx)) return J({ error: 'Enter the 64-character transaction hash of your payment.' }, 400, nc);
+    let prec = null; if (b.pay) { const pl = await payAll(env); prec = pl.find(x => x.id === b.pay && x.kind === 'tn' && x.status === 'paid' && !x.used); if (!prec) return J({ error: 'That payment was not found or was already used.' }, 400, nc); s.tx = String(prec.tx).toLowerCase(); }
+    else if (!/^[a-f0-9]{64}$/.test(s.tx)) return J({ error: 'Enter the 64-character transaction hash of your payment.' }, 400, nc);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email)) return J({ error: 'A valid contact email is required.' }, 400, nc);
     const all = await tnAll(env); if (all.some(x => x.tx === s.tx)) return J({ error: 'That transaction has already been used.' }, 400, nc);
-    const v = await tnVerify(s.tx, await tnCfg(env)), id = 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    const v = prec ? { paid: true, why: '', from: prec.from } : await tnVerify(s.tx, await tnCfg(env)), id = 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
     const rec = Object.assign(s, { id, ts: Date.now(), status: 'pending', paid: v.paid, why: v.why, from: v.from || '' });
-    all.unshift(rec); await env.KV.put('tn', JSON.stringify(all.slice(0, 400))); await env.KV.put(rk, String(n + 1), { expirationTtl: 3600 });
+    all.unshift(rec); await env.KV.put('tn', JSON.stringify(all.slice(0, 400))); if (prec) { const pl = await payAll(env), pr = pl.find(x => x.id === prec.id); if (pr) { pr.used = 1; pr.ref = id; await paySave(env, pl); } } await env.KV.put(rk, String(n + 1), { expirationTtl: 3600 });
     return J({ ok: 1, id, paid: v.paid, why: v.why }, 200, nc);
   }
   if (p.indexOf('/api/tn/') === 0 && req.method === 'GET') { const sl = decodeURIComponent(p.slice(8)), s = (await tnAll(env)).find(x => x.slug === sl && x.status === 'approved'); if (!s) return J({ error: 'not found' }, 404, nc); return J(Object.assign(tnPub(s), { body: s.body, name: s.name || '' }), 200, { 'cache-control': 'public, max-age=60' }); }
@@ -496,6 +497,7 @@ async function admin(req, env) {
   if (b.action === 'an-get') return await anGet(b, env);
   if (/^tn-/.test(b.action || '')) return await tnAdmin(b, env);
   if (/^ctl-/.test(b.action || '')) return await ctlAdmin(b, env);
+  if (/^fin-/.test(b.action || '')) return await finAdmin(b, env);
   if (b.action === 'daily') return J(await daily(env, true));
   if (b.action === 'delete-post' && b.slug) { await env.KV.delete('b:' + b.slug); const l = ((await env.KV.get('blogs', 'json')) || []).filter(x => x.slug !== b.slug); await env.KV.put('blogs', JSON.stringify(l)); return J({ ok: 1 }); }
   return J({ error: 'bad request' }, 400);
@@ -684,6 +686,79 @@ async function ttsApi(env, u) {
     await env.KV.put('mkv:' + id, b64, { expirationTtl: 259200 }).catch(() => { }); return mk(b64);
   } catch (e) { return J({ error: 'tts', m: String(e.message || e).slice(0, 80) }, 502); }
 }
+/* ---------- XRP payments (ads + token posts) ---------- */
+const XRPL_RPC = 'https://s1.ripple.com:51234/';
+async function xrpc(method, params) { const r = await fetch(XRPL_RPC, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ method, params: [params] }) }).then(x => x.json()).catch(() => null); return r && r.result; }
+let _rate = null, _rateT = 0;
+async function xrpUsd(env) {
+  if (_rate && Date.now() - _rateT < 60000) return _rate;
+  let p = 0;
+  try { const r = await fetch('https://api.coinbase.com/v2/prices/XRP-USD/spot').then(x => x.json()); p = +r.data.amount; } catch (e) { }
+  if (!(p > 0)) { try { const r = await fetch('https://api.kraken.com/0/public/Ticker?pair=XRPUSD').then(x => x.json()); p = +Object.values(r.result)[0].c[0]; } catch (e) { } }
+  if (p > 0) { _rate = p; _rateT = Date.now(); await env.KV.put('xrpusd', String(p)).catch(() => { }); return p; }
+  return +(await env.KV.get('xrpusd').catch(() => 0)) || 0;
+}
+async function payAll(env) { return (await env.KV.get('pay', 'json')) || []; }
+async function paySave(env, l) { await env.KV.put('pay', JSON.stringify(l.slice(0, 600))); }
+function payMatch(t, rec, meta) {
+  const m = meta || t.meta || {}, dl = m.delivered_amount != null ? m.delivered_amount : t.Amount;
+  return t.TransactionType === 'Payment' && t.Destination === rec.addr && typeof dl === 'string' && +dl >= Math.floor(rec.xrp * 1e6 * 0.98) && m.TransactionResult === 'tesSUCCESS' && +t.DestinationTag === +rec.tag;
+}
+async function payCheck(env, rec, tx) {
+  if (rec.status === 'paid') return { paid: true, tx: rec.tx };
+  let hit = null;
+  if (tx) { const r = await xrpc('tx', { transaction: tx, binary: false }); if (!r || r.error) return { paid: false, why: 'Transaction not found yet' }; if (!r.validated) return { paid: false, why: 'Waiting for the ledger to validate it' }; if (!payMatch(r, rec)) return { paid: false, why: 'That transaction does not match the amount, address or payment tag' }; hit = { hash: r.hash || tx, from: r.Account }; }
+  else { const r = await xrpc('account_tx', { account: rec.addr, ledger_index_min: -1, ledger_index_max: -1, limit: 60, forward: false }); const l = (r && r.transactions) || []; for (const x of l) { const t = x.tx || x.tx_json; if (x.validated !== false && t && payMatch(t, rec, x.meta)) { hit = { hash: t.hash || x.hash, from: t.Account }; break; } } if (!hit) return { paid: false, why: 'Not seen on the ledger yet' }; }
+  const all = await payAll(env); if (all.some(x => x.tx === hit.hash && x.id !== rec.id && x.status === 'paid')) return { paid: false, why: 'That transaction was already used' };
+  const rr = all.find(x => x.id === rec.id) || rec; Object.assign(rr, { status: 'paid', tx: hit.hash, from: hit.from, paidTs: Date.now() }); await paySave(env, all);
+  if (rr.kind === 'ad') { const ads = (await env.KV.get('ads', 'json')) || [], a = ads.find(x => x.id === rr.ref); if (a) { a.paid = true; a.tx = rr.tx; await env.KV.put('ads', JSON.stringify(ads)); } }
+  return { paid: true, tx: rr.tx };
+}
+async function payApi(req, env, u, p) {
+  const nc = { 'cache-control': 'no-store' }, b = await req.json().catch(() => ({}));
+  if (p === '/api/pay/start' && req.method === 'POST') {
+    const ip = req.headers.get('cf-connecting-ip') || 'x', rk = 'payrl:' + ip, n = +(await env.KV.get(rk)) || 0; if (n >= 30) return J({ error: 'Too many requests. Try again later.' }, 429, nc);
+    await env.KV.put(rk, String(n + 1), { expirationTtl: 3600 });
+    const cfg = await tnCfg(env); if (!cfg.addr) return J({ error: 'Payments are not open yet — the receiving address is being set up.' }, 503, nc);
+    const rate = await xrpUsd(env); let xrp = 0, usd = 0, ref = '', kind = b.kind === 'ad' ? 'ad' : 'tn';
+    if (kind === 'ad') {
+      const ads = (await env.KV.get('ads', 'json')) || [], a = ads.find(x => x.id === b.ref); if (!a || a.th !== await sha(String(b.token || ''))) return J({ error: 'Ad ID or private key not recognised.' }, 403, nc);
+      if (a.paid) return J({ error: 'This ad is already paid.' }, 400, nc);
+      const ac = await adCfg(env); usd = +ac.prices[a.slot] || 0; if (!usd || !rate) return J({ error: 'Could not get the XRP price. Try again in a minute.' }, 503, nc); xrp = Math.max(1, Math.ceil(usd / rate * 100) / 100); ref = a.id;
+    } else { xrp = +cfg.price; usd = rate ? Math.round(xrp * rate * 100) / 100 : 0; }
+    const all = await payAll(env), now = Date.now();
+    if (kind === 'ad') { const ex = all.find(x => x.kind === 'ad' && x.ref === ref && x.status === 'awaiting' && x.exp > now); if (ex) { if (Math.abs(ex.xrp - xrp) / xrp > 0.03) { ex.xrp = xrp; ex.usd = usd; await paySave(env, all); } return J({ ok: 1, id: ex.id, addr: ex.addr, tag: ex.tag, xrp: ex.xrp, usd: ex.usd, rate, exp: ex.exp }, 200, nc); } }
+    let tag; do { tag = 100000000 + Math.floor(Math.random() * 899999999); } while (all.some(x => x.tag === tag));
+    const rec = { id: 'p' + now.toString(36) + Math.random().toString(36).slice(2, 5), kind, ref, tag, xrp, usd, rate, addr: cfg.addr, status: 'awaiting', ts: now, exp: now + 72 * 36e5 };
+    all.unshift(rec); await paySave(env, all);
+    return J({ ok: 1, id: rec.id, addr: rec.addr, tag, xrp, usd, rate, exp: rec.exp }, 200, nc);
+  }
+  if (p === '/api/pay/check' && req.method === 'POST') {
+    const all = await payAll(env), rec = all.find(x => x.id === b.id); if (!rec) return J({ error: 'Payment not found' }, 404, nc);
+    const tx = /^[A-Fa-f0-9]{64}$/.test(String(b.tx || '')) ? String(b.tx).toUpperCase() : '';
+    if (rec.status === 'awaiting' && Date.now() > rec.exp + 864e5) return J({ paid: false, why: 'This payment request expired. Start again.' }, 200, nc);
+    return J(await payCheck(env, rec, tx), 200, nc);
+  }
+  return J({ error: 'not found' }, 404, nc);
+}
+async function finAdmin(b, env) {
+  const a = b.action, cfg = await tnCfg(env);
+  if (a === 'fin-summary') {
+    const pay = await payAll(env), rate = await xrpUsd(env), o = { rate, addr: cfg.addr, tnPrice: cfg.price, ad: await adCfg(env), pay: pay.slice(0, 200) };
+    const paid = pay.filter(x => x.status === 'paid'), sum = l => Math.round(l.reduce((s, x) => s + (+x.xrp || 0), 0) * 100) / 100, now = Date.now();
+    o.tot = { xrp: sum(paid), usd: Math.round(paid.reduce((s, x) => s + (+x.usd || 0), 0) * 100) / 100, ads: sum(paid.filter(x => x.kind === 'ad')), tn: sum(paid.filter(x => x.kind === 'tn')), d30: sum(paid.filter(x => now - x.paidTs < 30 * 864e5)), awaiting: pay.filter(x => x.status === 'awaiting' && x.exp > now).length, count: paid.length };
+    if (cfg.addr) { const ai = await xrpc('account_info', { account: cfg.addr, ledger_index: 'validated' }); o.bal = ai && ai.account_data ? Math.round(+ai.account_data.Balance / 1e4) / 100 : null; o.balErr = ai && ai.error ? ai.error : '';
+      const at = await xrpc('account_tx', { account: cfg.addr, ledger_index_min: -1, ledger_index_max: -1, limit: 40, forward: false }); o.inc = ((at && at.transactions) || []).filter(x => { const t = x.tx || x.tx_json; return t && t.TransactionType === 'Payment' && t.Destination === cfg.addr; }).slice(0, 20).map(x => { const t = x.tx || x.tx_json, m = x.meta || {}, dl = m.delivered_amount != null ? m.delivered_amount : t.Amount; return { hash: t.hash || x.hash, from: t.Account, tag: t.DestinationTag || null, xrp: typeof dl === 'string' ? +dl / 1e6 : null, ts: (t.date || 0) ? (t.date + 946684800) * 1000 : 0 }; }); }
+    const ads = (await env.KV.get('ads', 'json')) || []; o.adsPaid = ads.filter(x => x.paid).length; o.adsPending = ads.filter(x => x.status === 'pending').length;
+    const tn = await tnAll(env); o.tnPaid = tn.filter(x => x.paid).length; o.tnPending = tn.filter(x => x.status === 'pending').length;
+    return J(o, 200, { 'cache-control': 'no-store' });
+  }
+  const all = await payAll(env), rec = all.find(x => x.id === b.id); if (!rec) return J({ error: 'no such payment' }, 404);
+  if (a === 'fin-check') return J(await payCheck(env, rec, /^[A-Fa-f0-9]{64}$/.test(String(b.tx || '')) ? String(b.tx).toUpperCase() : ''));
+  if (a === 'fin-markpaid') { Object.assign(rec, { status: 'paid', tx: String(b.tx || 'manual').slice(0, 64), paidTs: Date.now(), manual: 1 }); await paySave(env, all); if (rec.kind === 'ad') { const ads = (await env.KV.get('ads', 'json')) || [], x = ads.find(y => y.id === rec.ref); if (x) { x.paid = true; await env.KV.put('ads', JSON.stringify(ads)); } } return J({ ok: 1 }); }
+  if (a === 'fin-void') { all.splice(all.indexOf(rec), 1); await paySave(env, all); return J({ ok: 1 }); }
+  return J({ error: 'bad fin action' }, 400);
+}
 /* ---------- traffic analytics ---------- */
 const BOTUA = /bot|spider|crawl|slurp|facebookexternalhit|preview|headless|monitor|lighthouse|curl|wget/i;
 async function hitApi(req, env, ctx) {
@@ -716,6 +791,7 @@ export default {
     try {
       if (p === '/api/news') return await news(env, ctx);
       if (p === '/api/tts') return await ttsApi(env, u);
+      if (p.indexOf('/api/pay/') === 0) return await payApi(req, env, u, p);
       if (p === '/api/cfg') return J(await ctlGet(env), 200, { 'cache-control': 'public, max-age=30' });
       if (p === '/api/hit') return await hitApi(req, env, ctx);
       if (p === '/api/story') return await storyApi(env, u);

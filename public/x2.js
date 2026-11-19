@@ -429,3 +429,34 @@ function ld(){fetch('/api/cfg').then(function(r){return r.json()}).then(function
 try{var c0=JSON.parse(localStorage.getItem('x2cfg')||'null');if(c0)ap(c0)}catch(e){}
 ld();setInterval(function(){if(document.visibilityState==='visible')ld()},300000);
 })();
+
+/* v22 pay modal */
+(function(){
+function es(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+if(!document.getElementById('xpcss')){var st=document.createElement('style');st.id='xpcss';st.textContent='#xpay{position:fixed;inset:0;z-index:10000;background:rgba(3,6,12,.78);display:grid;place-items:center;padding:14px;backdrop-filter:blur(4px)}#xpay .pm{width:min(480px,100%);max-height:92dvh;overflow:auto;background:var(--panel,#10151f);border:1px solid var(--line,#263041);border-radius:18px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.6);color:var(--text,#e8eefc)}#xpay h3{margin:0 0 4px;font-size:19px}#xpay .st{display:flex;gap:6px;margin:12px 0 16px}#xpay .st i{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.12)}#xpay .st i.on{background:linear-gradient(90deg,#2f6bff,#4fb4ff)}#xpay .sl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--dim,#8b96a8);margin:12px 0 4px}#xpay .bx{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.05);border:1px solid var(--line,#263041);border-radius:11px;padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;word-break:break-all}#xpay .bx span{flex:1}#xpay .bx button{flex:none}#xpay .big{font-size:30px;font-weight:800}#xpay .mu{font-size:12.5px;color:var(--dim,#8b96a8);line-height:1.45}#xpay .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}#xpay .wt{display:flex;gap:10px;align-items:center;margin-top:14px;padding:11px 12px;border-radius:11px;background:rgba(47,107,255,.12);font-size:13px}#xpay .sp{width:14px;height:14px;border-radius:50%;border:2px solid #4fb4ff;border-top-color:transparent;animation:xps 1s linear infinite;flex:none}@keyframes xps{to{transform:rotate(360deg)}}#xpay input{width:100%;box-sizing:border-box;margin-top:4px}#xpay .ok{color:#35d6a0}#xpay .er{color:#ff5d73}';document.head.appendChild(st)}
+window.XDpay=function(o){
+ var d=document,ov=d.createElement('div'),R=null,tm=0,alive=1,step=1;ov.id='xpay';d.body.appendChild(ov);
+ function close(){alive=0;clearTimeout(tm);ov.remove()}
+ function cp(t,b){try{navigator.clipboard.writeText(String(t))}catch(e){}if(b){var x=b.textContent;b.textContent='Copied ✓';setTimeout(function(){b.textContent=x},1200)}}
+ function shell(n,body){step=n;ov.innerHTML='<div class="pm"><h3>'+es(o.title||'Pay with XRP')+'</h3><div class="mu">'+es(o.sub||'')+'</div><div class="st">'+[1,2,3].map(function(i){return '<i class="'+(i<=n?'on':'')+'"></i>'}).join('')+'</div>'+body+'</div>';
+  ov.onclick=function(e){if(e.target===ov&&n!==2)close()};[].forEach.call(ov.querySelectorAll('[data-cp]'),function(b){b.onclick=function(){cp(b.getAttribute('data-cp'),b)}});var x=ov.querySelector('[data-x]');if(x)x.onclick=close}
+ function review(){shell(1,'<div class="sl">Step 1 · Review</div><div class="big" id="pamt">…</div><div class="mu" id="pusd"></div><p class="mu">You will send this amount of XRP from any wallet. Each payment has its own <b>destination tag</b>, so we can match it to your order automatically — no need to email a transaction hash.</p><div class="row"><button class="btn2 pri" id="pgo">Continue to payment</button><button class="btn2" data-x>Cancel</button></div><div id="perr" class="er mu"></div>');
+  $('pgo').onclick=function(){this.disabled=true;this.textContent='Preparing…';fetch('/api/pay/start',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:o.kind,ref:o.ref||'',token:o.token||''})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'Could not start the payment');R=j;send()}).catch(function(e){$('perr').textContent=e.message;$('pgo').disabled=false;$('pgo').textContent='Try again'})};
+  if(o.xrp){$('pamt').textContent=o.xrp+' XRP'}else{$('pamt').textContent='Amount shown next';}}
+ function $(id){return ov.querySelector('#'+id)}
+ function send(){var link='https://xumm.app/detect/request:'+R.addr+'?amount='+R.xrp+'&dt='+R.tag;
+  shell(2,'<div class="sl">Step 2 · Send exactly</div><div class="big">'+es(R.xrp)+' XRP</div><div class="mu">≈ $'+es(R.usd)+(R.rate?' at $'+es(R.rate)+' per XRP':'')+' · valid for 72 hours</div>'+
+  '<div class="sl">To address</div><div class="bx"><span>'+es(R.addr)+'</span><button class="btn2" data-cp="'+es(R.addr)+'">Copy</button></div>'+
+  '<div class="sl">Destination tag <b class="er">(required)</b></div><div class="bx"><span>'+es(R.tag)+'</span><button class="btn2" data-cp="'+es(R.tag)+'">Copy</button></div>'+
+  '<p class="mu">You must include the destination tag or we cannot match your payment. Send at least the amount shown (small price changes are tolerated).</p>'+
+  '<div class="row"><a class="btn2 pri" target="_blank" rel="noopener" href="'+link+'">Open in Xaman</a><button class="btn2" data-cp="'+es(R.xrp)+'">Copy amount</button></div>'+
+  '<div class="wt"><span class="sp"></span><span id="pst">Waiting for your payment on the XRP Ledger…</span></div>'+
+  '<div class="sl">Already sent? Paste the transaction hash</div><input type="text" id="ptx" maxlength="64" placeholder="64-character hash" class="mono"><div class="row"><button class="btn2" id="pchk">Check now</button><button class="btn2" data-x>Close (payment stays open)</button></div>');
+  $('pchk').onclick=function(){poll(1)};poll(0)}
+ function poll(manual){if(!alive||step!==2)return;clearTimeout(tm);var tx=($('ptx')&&$('ptx').value.trim())||'';
+  fetch('/api/pay/check',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:R.id,tx:tx})}).then(function(r){return r.json()}).then(function(j){if(!alive||step!==2)return;if(j.paid){done(j)}else{if($('pst'))$('pst').textContent=(manual&&j.why)?j.why:'Waiting for your payment on the XRP Ledger…';tm=setTimeout(function(){if(d.visibilityState==='visible')poll(0);else tm=setTimeout(function(){poll(0)},15000)},7000)}}).catch(function(){tm=setTimeout(function(){poll(0)},10000)})}
+ function done(j){step=3;clearTimeout(tm);shell(3,'<div class="sl ok">Step 3 · Payment confirmed ✓</div><p>We received <b>'+es(R.xrp)+' XRP</b>.</p><div class="mu mono" style="word-break:break-all">'+es(j.tx||'')+'</div><p class="mu">'+es(o.doneMsg||'Thank you!')+'</p><div class="row"><button class="btn2 pri" id="pfin">Continue</button></div>');$('pfin').onclick=function(){close();try{o.onPaid&&o.onPaid({id:R.id,tx:j.tx})}catch(e){}}}
+ review();
+ if(o.xrp)$('pusd').textContent=o.usdHint||'';
+};
+})();
