@@ -417,11 +417,13 @@ async function adsAdmin(b, env) {
 }
 
 /* ---------- orchestration ---------- */
+async function topRefresh(env) { const sv = await env.KV.get('toptok', 'json').catch(() => null); if (sv && Date.now() - sv.ts < 12 * 6e4) return 'fresh'; const d = await sqGet('/v1/tokens?start=0&limit=50&sortBy=vol24hxrp&sortType=desc', 60); if (!(d.tokens || []).length) return 'empty'; await env.KV.put('toptok', JSON.stringify({ ts: Date.now(), t: d.tokens.slice(0, 50) }), { expirationTtl: 86400 }); return 'ok'; }
 async function tick(env, force) {
   if (busy) return { busy: true }; busy = true; const log = {};
   try {
     log.news = await refresh(env, force).catch(e => 'ERR ' + e.message);
     log.stats = await stats(env).catch(e => 'ERR ' + e.message);
+    log.top = await topRefresh(env).catch(e => 'ERR ' + e.message);
     log.hourly = await hourly(env).catch(e => 'ERR ' + e.message);
     log.daily = await daily(env).catch(e => 'ERR ' + e.message);
   } finally { busy = false; }
@@ -545,7 +547,7 @@ async function sqApi(req, env, u, p) {
       return new Response(r.body, { headers: { 'content-type': ct, 'access-control-allow-origin': '*', 'cache-control': 'public, max-age=86400' } });
     }
     if (p === '/api/sq/token') { const s = (q.get('slug') || '').replace(/[^A-Za-z0-9_.\-]/g, '').slice(0, 120); if (!s) return J({ error: 'slug' }, 400); try { const d = await sqGet('/v1/token/' + s, 120); if (d.token && Math.random() < 0.15) await env.KV.put('tk:' + s, JSON.stringify(d.token), { expirationTtl: 86400 }).catch(() => { }); return J({ token: d.token || null }, 200, H); } catch (e) { const st = await env.KV.get('tk:' + s, 'json').catch(() => null); if (st) return J({ token: st, stale: 1 }, 200, H); throw e; } }
-    if (p === '/api/sq/tokens') { const ok = ['vol24hxrp', 'pro24h', 'marketcap', 'holders', 'trendingScore', 'dateon', 'pro7d', 'vol24h'], sort = ok.includes(q.get('sort')) ? q.get('sort') : 'vol24hxrp', dir = q.get('dir') === 'asc' ? 'asc' : 'desc', lim = Math.max(1, Math.min(200, +q.get('limit') || 100)), st = Math.max(0, +q.get('start') || 0); const top = sort === 'vol24hxrp' && dir === 'desc' && st === 0 && lim <= 50; try { const d = await sqGet('/v1/tokens?start=' + st + '&limit=' + lim + '&sortBy=' + sort + '&sortType=' + dir, 120); if (top && (d.tokens || []).length && Math.random() < 0.25) await env.KV.put('toptok', JSON.stringify(d.tokens.slice(0, 50)), { expirationTtl: 86400 }).catch(() => { }); return J({ tokens: d.tokens || [], total: d.total || 0 }, 200, H); } catch (e) { const sv = top && await env.KV.get('toptok', 'json').catch(() => null); if (sv) return J({ tokens: sv, total: sv.length, stale: 1 }, 200, H); throw e; } }
+    if (p === '/api/sq/tokens') { const ok = ['vol24hxrp', 'pro24h', 'marketcap', 'holders', 'trendingScore', 'dateon', 'pro7d', 'vol24h'], sort = ok.includes(q.get('sort')) ? q.get('sort') : 'vol24hxrp', dir = q.get('dir') === 'asc' ? 'asc' : 'desc', lim = Math.max(1, Math.min(200, +q.get('limit') || 100)), st = Math.max(0, +q.get('start') || 0); const top = sort === 'vol24hxrp' && dir === 'desc' && st === 0 && lim <= 50; const sv = top ? await env.KV.get('toptok', 'json').catch(() => null) : null; if (sv && sv.t && Date.now() - sv.ts < 15 * 6e4) return J({ tokens: sv.t, total: sv.t.length, ts: sv.ts }, 200, H); try { const d = await sqGet('/v1/tokens?start=' + st + '&limit=' + lim + '&sortBy=' + sort + '&sortType=' + dir, 120); if (top && (d.tokens || []).length) await env.KV.put('toptok', JSON.stringify({ ts: Date.now(), t: d.tokens.slice(0, 50) }), { expirationTtl: 86400 }).catch(() => { }); return J({ tokens: d.tokens || [], total: d.total || 0, ts: Date.now() }, 200, H); } catch (e) { if (sv && sv.t) return J({ tokens: sv.t, total: sv.t.length, ts: sv.ts, stale: 1 }, 200, H); throw e; } }
     if (p === '/api/sq/search') {
       const s = (q.get('q') || '').trim().slice(0, 64); if (s.length < 2) return J({ items: [] }, 200, H);
       let d = null; try { const r = await fetch('https://api.xrpl.to/v1/search', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, SQ_UA), body: JSON.stringify({ search: s, limit: 24, offset: 0 }) }); if (r.ok) d = await r.json(); } catch (e) {}

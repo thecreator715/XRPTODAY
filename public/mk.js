@@ -79,10 +79,11 @@ function tpc(v){if(v==null||isNaN(v))return '<span class="mu">—</span>';v=+v;r
 var TOP={rows:[],sort:'vol24hxrp',dir:-1,q:'',ts:0,stale:0,busy:0};
 function topLoad(force){
  if(TOP.busy)return;TOP.busy=1;
- var P='/v1/tokens?start=0&limit=50&sortBy=vol24hxrp&sortType=desc';
- fetch('https://api.xrpl.to'+P).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
- .catch(function(){return new Promise(function(ok){setTimeout(ok,700)}).then(function(){return fetch('/api/sq/tokens?sort=vol24hxrp&dir=desc&limit=50').then(function(r){return r.json()})})})
- .then(function(d){if(!d||!d.tokens||!d.tokens.length)throw new Error('none');TOP.rows=d.tokens.slice(0,50);TOP.ts=Date.now();TOP.stale=d.stale?1:0;try{localStorage.setItem('x2top',JSON.stringify({r:TOP.rows,ts:TOP.ts}))}catch(e){}},function(){var c=null;try{c=JSON.parse(localStorage.getItem('x2top'))}catch(e){}if(c&&c.r){TOP.rows=c.r;TOP.ts=c.ts;TOP.stale=1}})
+ fetch('/api/sq/tokens?sort=vol24hxrp&dir=desc&limit=50').then(function(r){return r.json()})
+ .then(function(d){if(d&&d.tokens&&d.tokens.length)return d;throw new Error('none')})
+ .catch(function(){return fetch('https://api.xrpl.to/v1/tokens?start=0&limit=50&sortBy=vol24hxrp&sortType=desc').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})})
+ .then(function(d){if(!d||!d.tokens||!d.tokens.length)throw new Error('none');TOP.rows=d.tokens.slice(0,50);TOP.ts=d.ts||Date.now();TOP.stale=d.stale?1:0;try{localStorage.setItem('x2top',JSON.stringify({r:TOP.rows,ts:TOP.ts}))}catch(e){}})
+ .catch(function(){var c=null;try{c=JSON.parse(localStorage.getItem('x2top'))}catch(e){}if(c&&c.r){TOP.rows=c.r;TOP.ts=c.ts;TOP.stale=1}})
  .then(function(){TOP.busy=0;topDraw()});
 }
 function topDraw(){
