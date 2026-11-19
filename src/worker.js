@@ -418,7 +418,7 @@ async function adsAdmin(b, env) {
 }
 
 /* ---------- orchestration ---------- */
-async function topRefresh(env) { const sv = await env.KV.get('toptok', 'json').catch(() => null); if (sv && Date.now() - sv.ts < 12 * 6e4) return 'fresh'; const d = await sqGet('/v1/tokens?start=0&limit=50&sortBy=vol24hxrp&sortType=desc', 60); if (!(d.tokens || []).length) return 'empty'; await env.KV.put('toptok', JSON.stringify({ ts: Date.now(), t: d.tokens.slice(0, 50) }), { expirationTtl: 86400 }); return 'ok'; }
+async function topRefresh(env) { if (env.XRPL_KEY) SQK = env.XRPL_KEY; const sv = await env.KV.get('toptok', 'json').catch(() => null); if (sv && Date.now() - sv.ts < 12 * 6e4) return 'fresh'; const d = await sqGet('/v1/tokens?start=0&limit=50&sortBy=vol24hxrp&sortType=desc', 60); if (!(d.tokens || []).length) return 'empty'; await env.KV.put('toptok', JSON.stringify({ ts: Date.now(), t: d.tokens.slice(0, 50) }), { expirationTtl: 86400 }); return 'ok'; }
 async function tick(env, force) {
   if (busy) return { busy: true }; const C = await ctlGet(env); if (C.cronOff && !force) return { off: 1 }; busy = true; const log = {};
   try {
@@ -538,8 +538,10 @@ async function page(env, u, ua) {
 }
 /* ---- XRPL Squares: token data proxy (xrpl.to) ---- */
 const SQ_UA = { 'user-agent': 'XRPLTODAY/1.0 (+squares)', accept: 'application/json' };
-async function sqGet(path, ttl) { const r = await fetch('https://api.xrpl.to' + path, { headers: SQ_UA, cf: { cacheTtl: ttl || 60, cacheEverything: true } }); if (!r.ok) throw new Error('upstream ' + r.status); return r.json(); }
+let SQK = '';
+async function sqGet(path, ttl) { const r = await fetch('https://api.xrpl.to' + path, { headers: SQK ? Object.assign({}, SQ_UA, { 'X-Api-Key': SQK }) : SQ_UA, cf: { cacheTtl: ttl || 60, cacheEverything: true } }); if (!r.ok) throw new Error('upstream ' + r.status); return r.json(); }
 async function sqApi(req, env, u, p) {
+  if (env.XRPL_KEY) SQK = env.XRPL_KEY;
   const H = { 'cache-control': 'public, max-age=30' }, q = u.searchParams;
   try {
     if (p === '/api/sq/ohlc') { const md5 = (q.get('md5') || '').replace(/[^a-f0-9]/gi, '').slice(0, 40), i = ['5m', '15m', '1h', '4h', '1d'].includes(q.get('i')) ? q.get('i') : '1h', n = Math.max(10, Math.min(300, +q.get('n') || 96)); if (!md5) return J({ error: 'md5' }, 400); const d = await sqGet('/v1/ohlc/' + md5 + '?interval=' + i + '&limit=' + n, 45); return J({ ohlc: d.ohlc || [] }, 200, H); }
