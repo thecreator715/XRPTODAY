@@ -460,3 +460,6 @@ window.XDpay=function(o){
  if(o.xrp)$('pusd').textContent=o.usdHint||'';
 };
 })();
+
+/* wallet nav link */
+(function(){function a(){var t=document.querySelector('button.nav[data-go="top"]');if(!t||document.getElementById('navwl'))return;var b=document.createElement('button');b.className='nav';b.id='navwl';b.innerHTML=t.querySelector('svg').outerHTML.replace(/<path[^>]*\/>/,'<path d="M3 7h18v12H3zM3 7l3-3h12l3 3M16 13h2"/>')+'Wallet &amp; Swap<span class="bd">NEW</span>';b.onclick=function(){location.href='/wallet'};t.parentNode.insertBefore(b,t.nextSibling)}a();setTimeout(a,800);setTimeout(a,2500)})();
