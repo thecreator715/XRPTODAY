@@ -776,3 +776,12 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #vToken .tkrow .tkpr #tkpc{font-size:12px}
 #vToken .tkid .tkcur{margin-left:0;font-size:11.5px;white-space:nowrap;line-height:1.4}
 #vToken .tkid .tkcur .cp{padding:0;margin:0;background:none;border:0;color:inherit;font:inherit}
+
+/* v33 mobile header: stretch to full width, price block flush right */
+@media(max-width:759px){
+#vToken .tkhd{flex-wrap:wrap;align-items:flex-start}
+#vToken .tkhd .sp{display:none!important}
+#vToken .tkhd .tkid{flex:1 1 0!important;min-width:0!important;width:auto}
+#vToken .tkrow{width:100%;display:flex;justify-content:space-between;align-items:flex-start}
+#vToken .tkrow .tkpr{margin-left:auto;align-items:flex-end;text-align:right}
+}
