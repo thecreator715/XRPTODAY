@@ -41,7 +41,7 @@ body.embed header,body.embed h1,body.embed h1+.mu,body.embed .wrap>.mu.sm,body.e
 html.embed,html.embed body{background:transparent!important}:root{color-scheme:dark}
 .sw2{position:relative;max-width:520px;margin:0 auto 12px;padding:16px;border-radius:22px;border:1px solid rgba(89,198,255,.2);background:linear-gradient(180deg,rgba(61,139,255,.10),rgba(10,16,30,.0) 45%),rgba(10,16,30,.72);box-shadow:0 24px 70px rgba(20,60,160,.28),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(8px)}
 body.embed .sw2{padding:14px;margin:0;max-width:none}
-.swh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}.swh b{font-size:17px;letter-spacing:-.3px}
+.swl{font-size:11.5px;color:var(--mu);margin:0 0 10px}.swh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}.swh b{font-size:17px;letter-spacing:-.3px}
 .pbadge{font-size:10.5px;background:rgba(53,214,160,.1);color:var(--up);padding:3px 9px;border-radius:999px;margin-left:8px;border:1px solid rgba(53,214,160,.25);font-weight:600}
 .slipg{display:flex;gap:4px;align-items:center;font-size:11px;color:var(--dim)}.slipg button{padding:4px 8px;font-size:11px;border-radius:8px;background:#0b1424}.slipg button.on{background:var(--blue);border-color:var(--blue);color:#fff}
 .box{background:rgba(5,9,18,.75);border:1px solid var(--line);border-radius:16px;padding:12px 14px;transition:border-color .2s,box-shadow .2s}.box:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(61,139,255,.16)}
@@ -82,6 +82,7 @@ body.embed .sw2{padding:14px;margin:0;max-width:none}
  <div id="t-bal"><div class="card"><h3>Tokens & LP tokens</h3><div class="tw"><table id="bt"></table></div><p class="mu sm" id="bnote"></p></div></div>
 
  <div id="t-swap" class="hide"><div class="card sw2">
+  <div class="swl" id="swl"></div>
   <div class="swh"><div><b>Swap</b><span id="spool" class="pbadge">AMM pool</span></div><div class="slipg" id="slipg"><span>Slippage</span><button data-s="0.1">0.1%</button><button data-s="0.5" class="on">0.5%</button><button data-s="1">1%</button><button data-s="3">3%</button></div></div>
   <select id="slip" class="hide"><option>0.1</option><option selected>0.5</option><option>1</option><option>3</option></select>
   <div class="box"><div class="bt"><span>You pay</span><span class="qk" id="qk"><button data-q="25">25%</button><button data-q="50">50%</button><button data-q="max">MAX</button></span></div>
@@ -90,7 +91,7 @@ body.embed .sw2{padding:14px;margin:0;max-width:none}
   <div class="swm"><button id="sflip" title="Flip">⇅</button></div>
   <div class="box"><div class="bt"><span>You receive (est.)</span><span id="spx"></span></div>
    <div class="br"><input id="sta" readonly placeholder="0.0"><select id="st"></select></div>
-   <div class="bb"><span id="stu">≈ $0.00</span><span id="smin"></span></div></div>
+   <div class="bb"><span id="stu">≈ $0.00</span><span style="text-align:right"><span id="smin"></span><br><span id="stb"></span></span></div></div>
   <div class="est2" id="sest"><div class="idle">Enter an amount to see the estimate</div></div>
   <button class="go" id="sgo" disabled>Enter an amount</button>
   <details class="adv"><summary>Pool not listed? Add any token</summary><div class="row" style="margin-top:8px"><input id="cust" placeholder="issuer r… : currency, e.g. rhCAT4hR…:FUZZY"><button class="fx" id="custb">Add</button></div></details>
@@ -188,7 +189,8 @@ function paint(rows){ROWS=rows;updateAct();var base=loadBase(),first=!base;
 function tile(a,b,c){return '<div class="tile"><small>'+a+'</small><b>'+b+'</b><em>'+(c||'&nbsp;')+'</em></div>'}
 function fillSel(){['sf','st','pa','pb'].forEach(function(id){var s=$(id),cur=s.value;s.innerHTML=AS.map(function(a,i){return '<option value="'+i+'">'+esc(lbl(a))+(a.i?' · '+esc(a.i.slice(0,5))+'…':'')+'</option>'}).join('');if(cur&&AS[+cur])s.value=cur;else{if(id==='sf'||id==='pa')s.value='0';if(id==='st'||id==='pb')s.value=String(Math.max(1,INIT?AS.findIndex(function(a){return key(a)===key(INIT)}):AS.findIndex(function(a){return a.n==='FUZZY'})))}});}
 function bal(a){if(a.c==='XRP')return xrpAvail();var l=LINES.filter(function(x){return x.currency===a.c&&x.account===a.i})[0];return l?+l.balance:0}
-function sBal(){var a=AS[+$('sf').value];if(a)$('sfb').textContent='Balance: '+nf(bal(a))+' '+lbl(a)+(a.c==='XRP'?' (spendable)':'')}
+function sBal(){var a=AS[+$('sf').value],b=AS[+$('st').value];if(a)$('sfb').textContent='Balance: '+nf(bal(a))+' '+lbl(a)+(a.c==='XRP'?' (spendable)':'');if(b)$('stb').textContent='Balance: '+nf(bal(b))+' '+lbl(b);var w=$('swl');if(w&&ADDR)w.innerHTML='Wallet '+esc(ADDR.slice(0,6))+'…'+esc(ADDR.slice(-5))+' · <b>'+nf(XRPB)+' XRP</b> ('+usd(XRPB*XU)+') · '+(ACTIVE?'active':'inactive')}
+function postRefresh(){AMMC={};PXC={};return refresh().then(function(){return new Promise(function(r){setTimeout(r,2500)})}).then(function(){AMMC={};PXC={};return refresh()})}
 /* ---- swap ---- */
 var SQ=null,SQN=0;
 function swapOut(p,fromA,dx){var inIsA=key(p.asset)===key(fromA),x=inIsA?p.a:p.b,y=inIsA?p.b:p.a,dxe=dx*(1-p.fee),out=y*dxe/(x+dxe),spot=y/x,exec=out/dx;return {out:out,spot:spot,exec:exec,impact:spot>0?(1-exec/spot)*100:0}}
@@ -224,7 +226,7 @@ function FEEP(x){return ADDR===FEE_ADDR?0:x*FEE_PCT}
 function payFee(x,why){if(ADDR===FEE_ADDR||!(x>0))return Promise.resolve();var drops=Math.max(1,Math.round(x*1e6));return submit({TransactionType:'Payment',Account:ADDR,Destination:FEE_ADDR,Amount:String(drops),Memos:[{Memo:{MemoType:xrpl.convertStringToHex('xrpltoday/fee'),MemoData:xrpl.convertStringToHex(why)}}]},'Platform fee '+nf(x,6)+' XRP')}
 function doSwap(){var q=SQ;if(!q||!W)return;if(!confirm((hasLine(q.b)?'':'First: add a '+lbl(q.b)+' trustline (reserve +'+RES.inc+' XRP).\n')+'Swap '+fx(q.v)+' '+lbl(q.a)+' for about '+nf(q.out,6)+' '+lbl(q.b)+'?\nPlatform fee: '+nf(q.feeX,6)+' XRP.\nThis is a real transaction on XRPL mainnet.'))return;$('sgo').disabled=true;$('sgo').textContent='Swapping…';
  var pre=Promise.resolve();if(!hasLine(q.b))pre=submit({TransactionType:'TrustSet',Account:ADDR,LimitAmount:{currency:q.b.c,issuer:q.b.i,value:'999999999999'}},'Trust line '+lbl(q.b));
- pre.then(function(){var out=q.out*3,tx={TransactionType:'Payment',Account:ADDR,Destination:ADDR,SendMax:amt(q.a,q.v),Amount:amt(q.b,out),DeliverMin:amt(q.b,q.min),Flags:0x00020000};return submit(tx,'Swap '+fx(q.v)+' '+lbl(q.a)+' → '+lbl(q.b))}).then(function(r){return payFee(q.feeX,'swap').catch(function(e){toast('Swap done. Fee payment failed: '+e.message)})}).then(function(){toast('Swap complete');$('sfa').value='';$('sta').value='';return refresh()}).catch(function(e){toast(e.message||String(e))}).then(function(){$('sgo').textContent='Swap';estSwap()})}
+ pre.then(function(){var out=q.out*3,tx={TransactionType:'Payment',Account:ADDR,Destination:ADDR,SendMax:amt(q.a,q.v),Amount:amt(q.b,out),DeliverMin:amt(q.b,q.min),Flags:0x00020000};return submit(tx,'Swap '+fx(q.v)+' '+lbl(q.a)+' → '+lbl(q.b))}).then(function(r){return payFee(q.feeX,'swap').catch(function(e){toast('Swap done. Fee payment failed: '+e.message)})}).then(function(){toast('Swap complete');$('sfa').value='';$('sta').value='';return postRefresh()}).catch(function(e){toast(e.message||String(e))}).then(function(){$('sgo').textContent='Swap';estSwap()})}
 /* ---- pools ---- */
 var DM='two',WM='two';
 function loadPool(){var a=AS[+$('pa').value],b=AS[+$('pb').value];if(!a||!b||key(a)===key(b)){toast('Pick two different assets');return}$('pinfo').textContent='Loading…';
@@ -256,7 +258,7 @@ function doDep(){var d=DEP,P=POOL;if(!d||!P||!W)return;if(!confirm('Add liquidit
  if(DM==='two'){tx.Flags=0x00100000;tx.Amount=mk(P.A,d.ax);tx.Amount2=mk(P.B,d.bx);if(key(P.p.asset)!==key(P.A)){var t=tx.Amount;tx.Amount=tx.Amount2;tx.Amount2=t}}
  else{tx.Flags=0x00080000;tx.Amount=DM==='a'?mk(P.A,d.ax):mk(P.B,d.bx)}
  var pre=Promise.resolve();var lpr=LINES.some(function(x){return x.account===P.p.acct});if(!lpr)pre=submit({TransactionType:'TrustSet',Account:ADDR,LimitAmount:{currency:P.p.lpc,issuer:P.p.acct,value:'999999999999'}},'LP trust line').catch(function(){});
- pre.then(function(){return submit(tx,'Add liquidity '+lbl(P.A)+'/'+lbl(P.B))}).then(function(){return payFee(d.feeX,'deposit').catch(function(e){toast('Deposit done. Fee payment failed: '+e.message)})}).then(function(){toast('Liquidity added');$('da').value='';$('db').value='';return refresh().then(loadPool)}).catch(function(e){toast(e.message||String(e))}).then(function(){$('dgo').textContent='Add liquidity';estDep()})}
+ pre.then(function(){return submit(tx,'Add liquidity '+lbl(P.A)+'/'+lbl(P.B))}).then(function(){return payFee(d.feeX,'deposit').catch(function(e){toast('Deposit done. Fee payment failed: '+e.message)})}).then(function(){toast('Liquidity added');$('da').value='';$('db').value='';return postRefresh().then(loadPool)}).catch(function(e){toast(e.message||String(e))}).then(function(){$('dgo').textContent='Add liquidity';estDep()})}
 function estWd(){$('wgo').disabled=true;WD=null;var P=POOL;if(!P||!(P.mine>0)){$('west').innerHTML='<div><span>Load a pool you hold LP tokens in</span></div>';return}
  var pct=+$('wp').value/100;$('wpl').textContent=Math.round(pct*100)+'%';var t=P.mine*pct,T=P.p.lp,fe=P.p.fee,ea=0,eb=0;
  if(WM==='two'){ea=P.ra*t/T;eb=P.rb*t/T}else if(WM==='a'){ea=P.ra*(1-Math.pow(1-t/T,2))*(1-fe/2)}else{eb=P.rb*(1-Math.pow(1-t/T,2))*(1-fe/2)}
@@ -268,7 +270,7 @@ function doWd(){var d=WD,P=POOL;if(!d||!P||!W)return;if(!confirm('Remove '+Math.
  var tx={TransactionType:'AMMWithdraw',Account:ADDR,Asset:ao(P.p.asset),Asset2:ao(P.p.asset2)},lpv={currency:P.p.lpc,issuer:P.p.acct,value:fx(+(d.pct>=0.999?P.mine:d.t).toPrecision(15))},sl=1-(+$('slip').value||0.5)/100;
  if(WM==='two'){if(d.pct>=0.999){tx.Flags=0x00020000}else{tx.Flags=0x00010000}tx.LPTokenIn=lpv}
  else{var a=WM==='a'?P.A:P.B,e=WM==='a'?d.ea:d.eb;if(d.pct>=0.999){tx.Flags=0x00040000;tx.Amount=amt(a,+(e*sl).toPrecision(12))}else{tx.Flags=0x00200000;tx.Amount=amt(a,+(e*sl).toPrecision(12));tx.LPTokenIn=lpv}}
- submit(tx,'Remove liquidity '+lbl(P.A)+'/'+lbl(P.B)).then(function(){return payFee(d.feeX,'withdraw').catch(function(e){toast('Withdrawal done. Fee payment failed: '+e.message)})}).then(function(){toast('Liquidity removed');return refresh().then(loadPool)}).catch(function(e){toast(e.message||String(e))}).then(function(){$('wgo').textContent='Remove liquidity';estWd()})}
+ submit(tx,'Remove liquidity '+lbl(P.A)+'/'+lbl(P.B)).then(function(){return payFee(d.feeX,'withdraw').catch(function(e){toast('Withdrawal done. Fee payment failed: '+e.message)})}).then(function(){toast('Liquidity removed');return postRefresh().then(loadPool)}).catch(function(e){toast(e.message||String(e))}).then(function(){$('wgo').textContent='Remove liquidity';estWd()})}
 /* ---- connect ---- */
 function connected(addr,w,watch){ADDR=addr;W=w;WATCH=!!watch;$('connect').classList.add('hide');$('app').classList.remove('hide');$('wchip').classList.remove('hide');$('disc').classList.remove('hide');$('wchip').innerHTML=(watch?'👁 ':'')+esc(addr.slice(0,6))+'…'+esc(addr.slice(-5))+' <b id="wst"></b> <a href="#" id="cpa" style="margin-left:6px">copy</a>';$('cpa').onclick=function(e){e.preventDefault();try{navigator.clipboard.writeText(ADDR);toast('Address copied')}catch(x){}};if(EMB){$('t-swap').classList.remove('hide')}refresh();clearInterval(connected.iv);connected.iv=setInterval(function(){if(!document.hidden)refresh()},15000)}
 function tabbing(boxId,fn){$(boxId).onclick=function(e){var b=e.target.closest('button');if(!b)return;[].forEach.call($(boxId).children,function(x){x.classList.toggle('on',x===b)});fn(b)}}
