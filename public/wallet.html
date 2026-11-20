@@ -444,7 +444,7 @@ document.addEventListener('click',function(e){var c=e.target.closest('.bcard[dat
 /* token list for picker */
 fetch('/api/sq/tokens?sort=vol24hxrp&dir=desc&limit=50').then(function(r){return r.json()}).then(function(d){(d.tokens||[]).slice(0,40).forEach(function(t){var a={c:t.currency,i:t.issuer,n:t.name||null};if(!TOK.some(function(x){return key(x)===key(a)})&&!PRESET.some(function(x){return key(x)===key(a)}))TOK.push(a)});if(ADDR){AS=AS.concat(TOK.filter(function(t){return !AS.some(function(a){return key(a)===key(t)})}));fillSel()}}).catch(function(){});
 
-if(EMB){var _h=0;setInterval(function(){var h=document.documentElement.scrollHeight;if(h!==_h){_h=h;parent.postMessage({xdswap:h},'*')}},400)}
+if(EMB){var _h=0;setInterval(function(){var h=0;[].forEach.call(document.body.children,function(c){if(c.tagName==='SCRIPT'||c.tagName==='STYLE')return;var cs=getComputedStyle(c);if(cs.position==='fixed'||cs.display==='none')return;var r=c.getBoundingClientRect();if(r.height)h=Math.max(h,Math.ceil(r.bottom+(window.pageYOffset||0)))});h+=16;if(Math.abs(h-_h)>3){_h=h;parent.postMessage({xdswap:h},'*')}},400)}
 connectLedger().then(loadXU).then(fillSel).then(autoLoad).catch(function(e){$('nt').textContent='offline';toast(e.message)});
 })();
 </script></body></html>
