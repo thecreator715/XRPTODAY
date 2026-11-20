@@ -14,8 +14,8 @@ function pc(v,d){if(v==null||isNaN(v))return '<span class="mu">—</span>';retur
 function hue(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h}
 function toast(m,c){if(window.XDtoast)window.XDtoast(m,c)}
 
-var DEF={n:50,cells:[],tf:'1h',type:'area',norm:false,usd:false,sma:false,vol:true,sync:true,auto:true,mode:'chart'};
-var Q=lsg('x2sq',null)||{};for(var k in DEF)if(Q[k]===undefined)Q[k]=DEF[k];
+var DEF={n:50,cells:[],tf:'1h',type:'area',norm:false,usd:false,sma:false,vol:true,sync:false,auto:true,mode:'chart'};
+var Q=lsg('x2sq',null)||{};for(var k in DEF)if(Q[k]===undefined)Q[k]=DEF[k];if(Q.syncv!==2){Q.sync=false;Q.syncv=2}
 Q.cells=(Q.cells||[]).slice(0,50);
 function save(){lss('x2sq',Q)}
 var DATA={},target=-1,timer=null,inited=false,screen={rows:[],sort:'vol24hxrp',dir:'desc',busy:false,f:{vol:0,mc:0,h:0,iss:''}};
