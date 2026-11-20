@@ -814,3 +814,10 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #vToken .tkrow .tkcur::before,#vToken .tkrow .tkcur::after{content:none!important}
 #vToken .tkrow .tkcur .cp{margin:0!important;padding:0!important;text-indent:0!important;min-width:0!important}
 }
+
+/* v38 extra height goes to row 2 so issuer hugs the name */
+@media(max-width:759px){
+#vToken .tkrow{grid-template-rows:auto 1fr!important}
+#vToken .tkrow h2{margin:0!important;line-height:1.1!important}
+#vToken .tkrow .tkcur{margin-top:0!important;align-self:start!important}
+}
