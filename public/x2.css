@@ -821,3 +821,17 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #vToken .tkrow h2{margin:0!important;line-height:1.1!important}
 #vToken .tkrow .tkcur{margin-top:0!important;align-self:start!important}
 }
+
+/* v39 token header desktop: one line, price beside name, scales */
+@media(min-width:760px){
+#vToken .tkhd{flex-wrap:nowrap;gap:clamp(8px,1.1vw,16px);align-items:center}
+#vToken .tkhd .back{flex:none;margin:0!important}
+#vToken .tkid{flex:0 0 auto;min-width:0}
+#vToken .tkpr{order:3;display:flex;align-items:baseline;gap:4px 8px;flex:0 1 auto;min-width:0;margin-left:clamp(6px,1.4vw,22px);flex-wrap:nowrap}
+#vToken .tkpr b{font-size:clamp(17px,1.9vw,26px)}
+#vToken .tkpr small,#vToken .tkpr .mono,#vToken #tkpc{font-size:clamp(10px,.85vw,13px);white-space:nowrap}
+#vToken .tkpr #tkpc{display:inline-flex;gap:4px}
+#vToken .tkhd .sp{order:4;flex:1 1 0;min-width:0}
+#vToken .tkbt{order:5;flex-wrap:nowrap;gap:clamp(4px,.5vw,8px);flex:0 1 auto}
+#vToken .tkbt .btn2{padding:7px clamp(6px,.75vw,12px);font-size:clamp(10.5px,.9vw,13px);white-space:nowrap}
+}
