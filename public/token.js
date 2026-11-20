@@ -1,6 +1,7 @@
 /* XRPLTODAY token page — loaded on demand for /token/:slug */
 (function(){
 if(window.XD_token&&window.XD_token.__v2)return;
+if(/[?&]embed=1/.test(location.search)){document.documentElement.classList.add('emb');var __st=document.createElement('style');__st.textContent='html.emb aside,html.emb header.top,html.emb .ticker,html.emb .foot,html.emb .tkhd .back,html.emb .burger{display:none!important}html.emb .main{margin:0!important;padding-top:0!important}html.emb body{overflow:hidden!important}';document.head.appendChild(__st);setInterval(function(){var v=document.getElementById('vToken');if(v&&parent!==window)parent.postMessage({xdTk:1,h:v.scrollHeight+24},'*')},700)}
 var TF={'15m':{n:96,l:'24h'},'1h':{n:120,l:'5d'},'4h':{n:120,l:'20d'},'1d':{n:120,l:'120d'}};
 var ST={tf:'1h',type:'candle',usd:true,sma:true,vol:true,slug:null,t:null,c:null,iv:null,pm:null};
 var WL=[];try{WL=JSON.parse(localStorage.getItem('x2wl')||'[]')}catch(e){}
