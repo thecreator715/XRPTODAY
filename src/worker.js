@@ -1,7 +1,7 @@
 // XRPLTODAY — live XRP / XRPL / RLUSD news terminal + hourly briefs + daily BONSAI x LUMA post
 // Bindings: KV (kv_namespace), AI (Workers AI), ADMIN_KEY (secret). Cron: */5 * * * *
 const HTML = __HTML__;
-const X2CSS = __X2CSS__, X2JS = __X2JS__, STATSJS = __STATSJS__, ADSJS = __ADSJS__, SQJS = __SQJS__, TKJS = __TKJS__, TNJS = __TNJS__, MKJS = __MKJS__, ADMHTML = __ADMHTML__;
+const X2CSS = __X2CSS__, X2JS = __X2JS__, STATSJS = __STATSJS__, ADSJS = __ADSJS__, SQJS = __SQJS__, TKJS = __TKJS__, TNJS = __TNJS__, MKJS = __MKJS__, ADMHTML = __ADMHTML__, WLHTML = __WLHTML__;
 const UA = { 'user-agent': 'Mozilla/5.0 (compatible; XRPLTODAYBot/1.0)', 'accept': 'application/rss+xml, application/xml, text/xml, */*' };
 const TTL = 72 * 36e5, MAXN = 500, DAILY_HOUR = 16; // daily BONSAI x LUMA post at 16:00 UTC
 let busy = false, lastErr = '';
@@ -809,6 +809,7 @@ export default {
       if (p.indexOf('/api/sq/') === 0) return await sqApi(req, env, u, p);
       if (p === '/token.js') return new Response((await env.KV.get('tkjs')) || TKJS, { headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=120' } });
       if (p === '/admin') return new Response((await env.KV.get('admhtml')) || ADMHTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow' } });
+      if (p === '/wallet') return new Response((await env.KV.get('wlhtml')) || WLHTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
       if (p === '/squares.js') return new Response((await env.KV.get('sqjs')) || SQJS, { headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=120' } });
       if (p === '/api/cover') return await coverApi(env, u);
       if (p === '/api/stats') return await statsApi(env, ctx);
