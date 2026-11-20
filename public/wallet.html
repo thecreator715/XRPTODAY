@@ -138,7 +138,7 @@ function pnl(v){if(v==null||!isFinite(v))return '<span class="mu">—</span>';re
 function pcs(v){if(v==null||!isFinite(v))return '';return '<span class="'+(v>=0?'up':'dn')+'">'+(v>=0?'+':'')+v.toFixed(2)+'%</span>'}
 function key(a){return a.c==='XRP'?'XRP':a.c+'|'+a.i}
 function ao(a){return a.c==='XRP'?{currency:'XRP'}:{currency:a.c,issuer:a.i}}
-function amt(a,v){return a.c==='XRP'?String(Math.round(v*1e6)):{currency:a.c,issuer:a.i,value:fx(v)}}
+function amt(a,v){return a.c==='XRP'?String(Math.round(v*1e6)):{currency:a.c,issuer:a.i,value:fx(+(+v).toPrecision(15))}}
 function fx(v){var s=(+v).toPrecision(15);if(/e/i.test(s))s=(+v).toFixed(15);if(s.indexOf('.')>=0)s=s.replace(/0+$/,'').replace(/\.$/,'');return s}
 function val(x){return typeof x==='string'?+x/1e6:+(x&&x.value)}
 function lbl(a){return a.n||cn(a.c)}
@@ -153,6 +153,7 @@ function run(j){cl.request(j.o).then(function(r){ACT--;j.res(r.result);pump()},f
 function rotate(){if(rotate.b)return;rotate.b=1;URLI++;var u=URLS[URLI%URLS.length];if(CLS[u]&&CLS[u].isConnected()){cl=CLS[u];rotate.b=0;return}var c=new xrpl.Client(u);c.connect().then(function(){CLS[u]=c;cl=c}).catch(function(){}).then(function(){rotate.b=0})}
 function loadXU(){return fetch('https://api.coinbase.com/v2/prices/XRP-USD/spot').then(function(r){return r.json()}).then(function(d){return +d.data.amount}).catch(function(){return fetch('https://api.kraken.com/0/public/Ticker?pair=XRPUSD').then(function(r){return r.json()}).then(function(d){return +d.result[Object.keys(d.result)[0]].c[0]})}).then(function(v){if(v>0){XU=v;$('px').textContent='XRP $'+v.toFixed(4)}}).catch(function(){})}
 /* ---- amm ---- */
+var TRC={};function trRate(a){if(a.c==='XRP')return Promise.resolve(1);if(TRC[a.i]!=null)return Promise.resolve(TRC[a.i]);return req({command:'account_info',account:a.i,ledger_index:'validated'}).then(function(r){var t=r.account_data.TransferRate;var v=t&&t>1e9?t/1e9:1;TRC[a.i]=v;return v}).catch(function(){return 1})}
 function ammInfo(a,b){var k=key(a)+'/'+key(b);if(AMMC[k]&&Date.now()-AMMC[k].t<8000)return Promise.resolve(AMMC[k].v);
  return req({command:'amm_info',asset:ao(a),asset2:ao(b),ledger_index:'validated'}).then(function(r){var m=r.amm,A=val(m.amount),B=val(m.amount2),f=(m.trading_fee||0)/100000;var v={acct:m.account,a:A,b:B,lp:+m.lp_token.value,lpc:m.lp_token.currency,fee:f,asset:a,asset2:b};AMMC[k]={t:Date.now(),v:v};return v}).catch(function(e){if(e&&e.data&&/actNotFound|ammNotFound/.test(e.data.error||''))return null;if(/actNotFound|ammNotFound|Account not found/i.test(String(e&&e.message)))return null;throw e})}
 function pxXrp(a){if(a.c==='XRP')return Promise.resolve(1);var k=key(a);if(PXC[k]&&Date.now()-PXC[k].t<30000)return Promise.resolve(PXC[k].v);
@@ -198,8 +199,8 @@ function estSwap(){var seq=++SQN,a=AS[+$('sf').value],b=AS[+$('st').value],v=par
  if(!a||!b||!isFinite(v)||v<=0){$('sest').innerHTML='<div class="idle">Enter an amount to see the estimate</div>';$('sta').value='';$('sgo').textContent='Enter an amount';$('sfu').textContent='≈ $0.00';$('stu').textContent='≈ $0.00';$('smin').textContent='';return}
  if(key(a)===key(b)){$('sest').innerHTML='<div class="idle">Pick two different assets</div>';$('sgo').textContent='Pick two assets';return}
  $('sest').innerHTML='<div class="idle">Fetching live pool…</div>';
- Promise.all([ammInfo(a,b),pxXrp(a),pxXrp(b)]).then(function(r){if(seq!==SQN)return;var p=r[0];if(!p){$('sest').innerHTML='<div class="idle wr">No AMM pool exists for '+esc(lbl(a))+' / '+esc(lbl(b))+'. Choose a pair that has a pool.</div>';$('sta').value='';$('sgo').textContent='No pool';$('spool').textContent='no pool';return}
-  var o=swapOut(p,a,v),slip=+$('slip').value/100,min=o.out*(1-slip),vx=a.c==='XRP'?v:(r[1]!=null?v*r[1]:(r[2]!=null?o.out*r[2]:null));
+ Promise.all([ammInfo(a,b),pxXrp(a),pxXrp(b),trRate(a)]).then(function(r){if(seq!==SQN)return;var p=r[0];if(!p){$('sest').innerHTML='<div class="idle wr">No AMM pool exists for '+esc(lbl(a))+' / '+esc(lbl(b))+'. Choose a pair that has a pool.</div>';$('sta').value='';$('sgo').textContent='No pool';$('spool').textContent='no pool';return}
+  var TR=r[3]||1,o=swapOut(p,a,v/TR),slip=+$('slip').value/100,min=o.out*(1-slip),vx=a.c==='XRP'?v:(r[1]!=null?v*r[1]:(r[2]!=null?o.out*r[2]:null));
   if(vx==null){$('sest').innerHTML='<div class="idle wr">Cannot value this swap in XRP, so the 1% fee cannot be calculated. Use a token that has an XRP pool.</div>';$('sgo').textContent='Cannot price';return}
   var feeX=FEEP(vx),have=bal(a),needX=(a.c==='XRP'?v:0)+feeX+0.0002;
   $('sta').value=fx(+o.out.toPrecision(8));
@@ -268,7 +269,7 @@ function estWd(){$('wgo').disabled=true;WD=null;var P=POOL;if(!P||!(P.mine>0)){$
  WD={t:t,ea:ea,eb:eb,feeX:feeX,pct:pct};$('wgo').disabled=!ok}
 function doWd(){var d=WD,P=POOL;if(!d||!P||!W)return;if(!confirm('Remove '+Math.round(d.pct*100)+'% of your '+lbl(P.A)+' / '+lbl(P.B)+' position?\nPlatform fee: '+nf(d.feeX,6)+' XRP.'))return;$('wgo').disabled=true;$('wgo').textContent='Removing…';
  var tx={TransactionType:'AMMWithdraw',Account:ADDR,Asset:ao(P.p.asset),Asset2:ao(P.p.asset2)},lpv={currency:P.p.lpc,issuer:P.p.acct,value:fx(+(d.pct>=0.999?P.mine:d.t).toPrecision(15))},sl=1-(+$('slip').value||0.5)/100;
- if(WM==='two'){if(d.pct>=0.999){tx.Flags=0x00020000}else{tx.Flags=0x00010000}tx.LPTokenIn=lpv}
+ if(WM==='two'){if(d.pct>=0.999){tx.Flags=0x00020000}else{tx.Flags=0x00010000;tx.LPTokenIn=lpv}}
  else{var a=WM==='a'?P.A:P.B,e=WM==='a'?d.ea:d.eb;if(d.pct>=0.999){tx.Flags=0x00040000;tx.Amount=amt(a,+(e*sl).toPrecision(12))}else{tx.Flags=0x00200000;tx.Amount=amt(a,+(e*sl).toPrecision(12));tx.LPTokenIn=lpv}}
  submit(tx,'Remove liquidity '+lbl(P.A)+'/'+lbl(P.B)).then(function(){return payFee(d.feeX,'withdraw').catch(function(e){toast('Withdrawal done. Fee payment failed: '+e.message)})}).then(function(){toast('Liquidity removed');return postRefresh().then(loadPool)}).catch(function(e){toast(e.message||String(e))}).then(function(){$('wgo').textContent='Remove liquidity';estWd()})}
 /* ---- connect ---- */
