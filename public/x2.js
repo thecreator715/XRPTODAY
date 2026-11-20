@@ -463,3 +463,7 @@ window.XDpay=function(o){
 
 /* wallet nav link */
 (function(){function a(){var t=document.querySelector('button.nav[data-go="top"]');if(!t||document.getElementById('navwl'))return;var b=document.createElement('button');b.className='nav';b.id='navwl';b.innerHTML=t.querySelector('svg').outerHTML.replace(/<path[^>]*\/>/,'<path d="M3 7h18v12H3zM3 7l3-3h12l3 3M16 13h2"/>')+'Wallet &amp; Swap<span class="bd">NEW</span>';b.onclick=function(){location.href='/wallet'};t.parentNode.insertBefore(b,t.nextSibling)}a();setTimeout(a,800);setTimeout(a,2500)})();
+
+/* fit sidebar to viewport height (no scrolling) */
+(function(){function fit(){var s=document.getElementById('side');if(!s)return;var k=[].slice.call(s.children),z=1;k.forEach(function(c){c.style.zoom=''});if(innerWidth<=760)return;for(var i=0;i<8&&s.scrollHeight>s.clientHeight+1;i++){z=Math.max(.55,z*(s.clientHeight/s.scrollHeight)-.005);k.forEach(function(c){c.style.zoom=z});if(z<=.55)break}}
+window.addEventListener('resize',fit);setInterval(fit,2000);setTimeout(fit,300);setTimeout(fit,1500)})();
