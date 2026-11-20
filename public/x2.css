@@ -746,3 +746,13 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #vMkt .art.toppg,.art.toppg{max-width:none!important;width:100%!important;margin-left:0;margin-right:0}
 .toppg .topw{overflow-x:auto}.toppg .toptb{width:100%;min-width:760px}
 @media(min-width:1100px){.topgrid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}}
+
+/* v30 chart polish */
+#vToken .tkmain>*{min-width:0}#vToken .tkcard{min-width:0;max-width:100%}#vToken .tkchart{overflow:hidden}
+#vToken .tkct{gap:6px;margin-bottom:10px}
+#vToken .tkct .seg2{display:inline-flex;gap:2px;padding:3px;border-radius:12px;background:#0a1220;border:1px solid var(--line2);flex-wrap:nowrap;margin:0}
+#vToken .tkct .chip2{border:0;background:transparent;box-shadow:none;padding:6px 10px;font-size:12px;border-radius:9px;color:#8fa0bd;min-width:0;transform:none}
+#vToken .tkct .chip2.on{background:linear-gradient(135deg,#2a63f0,#4fb4ff);color:#fff;box-shadow:none}
+#vToken .tkt{left:6px;right:70px;top:4px;padding:4px 8px;font-size:10px;line-height:1.4;background:rgba(8,12,20,.82);backdrop-filter:blur(4px);border-radius:8px}
+#vToken .tkt b{display:block;margin:0;color:#c9d6f0}#vToken .tkt span{margin:0 8px 0 0}
+#vToken .tkleg{font-size:11px;flex-wrap:wrap}#vToken .tkax{font-size:10px}#vToken .tktm{font-size:9.5px;color:#7f90ad}
