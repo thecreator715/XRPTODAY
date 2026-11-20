@@ -37,6 +37,7 @@ td{padding:10px 8px;border-top:1px solid var(--line);text-align:right;font-size:
 .log{max-height:300px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:12px}.log div{padding:5px 0;border-top:1px solid var(--line)}
 .hide{display:none!important}.pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(61,139,255,.18);color:var(--cyan);margin-left:6px;vertical-align:middle}
 .sw{display:flex;justify-content:center;margin:4px 0}.sw button{border-radius:999px;padding:6px 12px}
+body.embed header,body.embed h1,body.embed h1+.mu,body.embed .wrap>.mu.sm,body.embed #tabs,body.embed #sum,body.embed #t-bal,body.embed #t-pool,body.embed #t-act{display:none!important}body.embed .wrap{padding:0}body.embed{background:transparent}body.embed .card{margin:0;border:0;padding:4px 0;background:none}body.embed .card h3{display:none}body.embed #t-swap>.card{max-width:none}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#12203d;border:1px solid var(--blue);padding:10px 16px;border-radius:12px;z-index:9;max-width:92vw;display:none}
 </style></head><body>
 <div class="wrap">
@@ -97,8 +98,9 @@ td{padding:10px 8px;border-top:1px solid var(--line);text-align:right;font-size:
 (function(){
 var FEE_ADDR='rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M',FEE_PCT=0.01;
 var $=function(i){return document.getElementById(i)},cl=null,W=null,ADDR='',WATCH=false,XU=0,XRPB=0,RES={base:1,inc:0.2},OWN=0;
-var AS=[{c:'XRP',i:'',n:'XRP'}],AMMC={},PXC={},LINES=[],POOL=null,TOK=[];
+var QS=new URLSearchParams(location.search),EMB=QS.get('embed')==='1',INIT=null;if(EMB)document.body.classList.add('embed');var AS=[{c:'XRP',i:'',n:'XRP'}],AMMC={},PXC={},LINES=[],POOL=null,TOK=[];
 var PRESET=[{c:'46555A5A59000000000000000000000000000000',i:'rhCAT4hRdi2Y9puNdkpMzxrdKa5wkppR62',n:'FUZZY'},{c:'524C555344000000000000000000000000000000',i:'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De',n:'RLUSD'},{c:'5553444300000000000000000000000000000000',i:'rGm7WCVp9gb4jZHWTEtGUr4dd74z2XuWhE',n:'USDC'}];
+if(QS.get('to')&&QS.get('to').indexOf(':')>0){var _q=QS.get('to').split(':');INIT={c:_q[1],i:_q[0],n:QS.get('name')||null}}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(function(){t.style.display='none'},3800)}
 function cn(c){if(!c)return '?';if(/^[0-9A-Fa-f]{40}$/.test(c)){if(/^03/.test(c))return 'LP';var o='';for(var i=0;i<40;i+=2){var n=parseInt(c.substr(i,2),16);if(n)o+=String.fromCharCode(n)}return /^[\x20-\x7e]{2,}$/.test(o)?o:c.slice(0,6)+'…'}return c}
@@ -147,9 +149,9 @@ function paint(rows){ROWS=rows;var base=loadBase(),first=!base;
   else{h+='<tr><td><b>'+esc(lbl(r.a))+'</b>'+(r.a.i?'<small>'+esc(r.a.i.slice(0,6))+'…'+esc(r.a.i.slice(-4))+'</small>':'')+'</td><td>'+nf(r.bal)+'</td><td>'+(r.px!=null?nf(r.px):'—')+'</td><td>'+(r.px!=null?usd(r.px*XU):'—')+'</td><td>'+nf(r.x)+'</td><td>'+usd(r.u)+'</td><td>'+pnl(dxr)+'</td><td>'+(dur==null?'<span class="mu">—</span>':pnl(dur).replace(/>([+-]?)([\d.,]+)/,'>$1$$$2'))+'</td></tr>'}});
  $('bt').innerHTML=h;$('bnote').textContent='PnL is measured from the first time this wallet was viewed in this browser, using live pool prices. Unpriced tokens have no XRP pool to value them against.'+(XRPB===0?' This account is not funded yet; send at least '+RES.base+' XRP to activate it.':'');
  // asset lists
- AS=[{c:'XRP',i:'',n:'XRP'}];rows.forEach(function(r){if(r.a&&r.a.i)AS.push(r.a)});PRESET.forEach(function(p){if(!AS.some(function(a){return key(a)===key(p)}))AS.push({c:p.c,i:p.i,n:p.n})});TOK.forEach(function(p){if(!AS.some(function(a){return key(a)===key(p)}))AS.push(p)});fillSel();sBal();estSwap()}
+ AS=[{c:'XRP',i:'',n:'XRP'}];rows.forEach(function(r){if(r.a&&r.a.i)AS.push(r.a)});if(INIT&&!AS.some(function(a){return key(a)===key(INIT)}))AS.push(INIT);PRESET.forEach(function(p){if(!AS.some(function(a){return key(a)===key(p)}))AS.push({c:p.c,i:p.i,n:p.n})});TOK.forEach(function(p){if(!AS.some(function(a){return key(a)===key(p)}))AS.push(p)});fillSel();sBal();estSwap()}
 function tile(a,b,c){return '<div class="tile"><small>'+a+'</small><b>'+b+'</b><em>'+(c||'&nbsp;')+'</em></div>'}
-function fillSel(){['sf','st','pa','pb'].forEach(function(id){var s=$(id),cur=s.value;s.innerHTML=AS.map(function(a,i){return '<option value="'+i+'">'+esc(lbl(a))+(a.i?' · '+esc(a.i.slice(0,5))+'…':'')+'</option>'}).join('');if(cur&&AS[+cur])s.value=cur;else{if(id==='sf'||id==='pa')s.value='0';if(id==='st'||id==='pb')s.value=String(Math.max(1,AS.findIndex(function(a){return a.n==='FUZZY'})))}});}
+function fillSel(){['sf','st','pa','pb'].forEach(function(id){var s=$(id),cur=s.value;s.innerHTML=AS.map(function(a,i){return '<option value="'+i+'">'+esc(lbl(a))+(a.i?' · '+esc(a.i.slice(0,5))+'…':'')+'</option>'}).join('');if(cur&&AS[+cur])s.value=cur;else{if(id==='sf'||id==='pa')s.value='0';if(id==='st'||id==='pb')s.value=String(Math.max(1,INIT?AS.findIndex(function(a){return key(a)===key(INIT)}):AS.findIndex(function(a){return a.n==='FUZZY'})))}});}
 function bal(a){if(a.c==='XRP')return xrpAvail();var l=LINES.filter(function(x){return x.currency===a.c&&x.account===a.i})[0];return l?+l.balance:0}
 function sBal(){var a=AS[+$('sf').value];if(a)$('sfb').textContent='Balance: '+nf(bal(a))+' '+lbl(a)+(a.c==='XRP'?' (spendable)':'')}
 /* ---- swap ---- */
@@ -166,7 +168,7 @@ function estSwap(){var seq=++SQN,a=AS[+$('sf').value],b=AS[+$('st').value],v=par
   $('sta').value=fx(+o.out.toPrecision(8));
   var ok=true,msg='';if(v>have){ok=false;msg='Insufficient '+lbl(a)+' balance.'}else if(a.c==='XRP'&&needX>xrpAvail()){ok=false;msg='Not enough spendable XRP for the swap plus the 1% fee.'}else if(a.c!=='XRP'&&(feeX+0.0002)>xrpAvail()){ok=false;msg='You need a little spendable XRP for the 1% fee and network fees.'}
   if(WATCH){ok=false;msg='Watch-only wallet: import the seed to swap.'}
-  $('sest').innerHTML=row('Rate','1 '+lbl(a)+' ≈ '+nf(o.exec,8)+' '+lbl(b))+row('You receive (est.)',nf(o.out,8)+' '+lbl(b)+' ('+usd((b.c==='XRP'?o.out:(r[2]!=null?o.out*r[2]:NaN))*XU)+')')+row('Minimum received',nf(min,8)+' '+lbl(b))+row('Price impact',(o.impact<0.01?'<0.01':o.impact.toFixed(2))+'%'+(o.impact>3?' ⚠':''))+row('Pool fee',(p.fee*100).toFixed(2)+'%')+row('Platform fee (1%)',nf(feeX,6)+' XRP ('+usd(feeX*XU)+')')+row('Network fee','≈ 0.00002 XRP')+(msg?'<div><span class="dn">'+msg+'</span></div>':'');
+  $('sest').innerHTML=row('Rate','1 '+lbl(a)+' ≈ '+nf(o.exec,8)+' '+lbl(b))+row('You receive (est.)',nf(o.out,8)+' '+lbl(b)+' ('+usd((b.c==='XRP'?o.out:(r[2]!=null?o.out*r[2]:NaN))*XU)+')')+row('Minimum received',nf(min,8)+' '+lbl(b))+row('Price impact',(o.impact<0.01?'<0.01':o.impact.toFixed(2))+'%'+(o.impact>3?' ⚠':''))+row('Pool fee',(p.fee*100).toFixed(2)+'%')+row('Spot price (before trade)','1 '+lbl(a)+' = '+nf(o.spot,8)+' '+lbl(b))+row('Pool reserves',nf(key(p.asset)===key(a)?p.a:p.b)+' '+lbl(a)+' / '+nf(key(p.asset)===key(a)?p.b:p.a)+' '+lbl(b))+row('Trade size vs pool',(v/(key(p.asset)===key(a)?p.a:p.b)*100).toFixed(3)+'%')+row('Route','Direct AMM pool '+p.acct.slice(0,6)+'…')+row('Platform fee (1%)',nf(feeX,6)+' XRP ('+usd(feeX*XU)+')')+row('Network fee','≈ 0.00002 XRP')+(msg?'<div><span class="dn">'+msg+'</span></div>':'');
   SQ={a:a,b:b,v:v,p:p,min:min,out:o.out,feeX:feeX};$('sgo').disabled=!ok}).catch(function(e){if(seq===SQN)$('sest').innerHTML='<div><span class="dn">'+esc(e&&e.message||e)+'</span></div>'})}
 function row(a,b){return '<div><span>'+a+'</span><b>'+b+'</b></div>'}
 function hasLine(b){return b.c==='XRP'||LINES.some(function(x){return x.currency===b.c&&x.account===b.i})}
@@ -221,7 +223,7 @@ function doWd(){var d=WD,P=POOL;if(!d||!P||!W)return;if(!confirm('Remove '+Math.
  else{var a=WM==='a'?P.A:P.B,e=WM==='a'?d.ea:d.eb;if(d.pct>=0.999){tx.Flags=0x00040000;tx.Amount=amt(a,+(e*sl).toPrecision(12))}else{tx.Flags=0x00200000;tx.Amount=amt(a,+(e*sl).toPrecision(12));tx.LPTokenIn=lpv}}
  submit(tx,'Remove liquidity '+lbl(P.A)+'/'+lbl(P.B)).then(function(){return payFee(d.feeX,'withdraw').catch(function(e){toast('Withdrawal done. Fee payment failed: '+e.message)})}).then(function(){toast('Liquidity removed');return refresh().then(loadPool)}).catch(function(e){toast(e.message||String(e))}).then(function(){$('wgo').textContent='Remove liquidity';estWd()})}
 /* ---- connect ---- */
-function connected(addr,w,watch){ADDR=addr;W=w;WATCH=!!watch;$('connect').classList.add('hide');$('app').classList.remove('hide');$('wchip').classList.remove('hide');$('disc').classList.remove('hide');$('wchip').innerHTML=(watch?'👁 ':'')+esc(addr.slice(0,6))+'…'+esc(addr.slice(-5))+' <a href="#" id="cpa" style="margin-left:6px">copy</a>';$('cpa').onclick=function(e){e.preventDefault();try{navigator.clipboard.writeText(ADDR);toast('Address copied')}catch(x){}};refresh();clearInterval(connected.iv);connected.iv=setInterval(function(){if(!document.hidden)refresh()},45000)}
+function connected(addr,w,watch){ADDR=addr;W=w;WATCH=!!watch;$('connect').classList.add('hide');$('app').classList.remove('hide');$('wchip').classList.remove('hide');$('disc').classList.remove('hide');$('wchip').innerHTML=(watch?'👁 ':'')+esc(addr.slice(0,6))+'…'+esc(addr.slice(-5))+' <a href="#" id="cpa" style="margin-left:6px">copy</a>';$('cpa').onclick=function(e){e.preventDefault();try{navigator.clipboard.writeText(ADDR);toast('Address copied')}catch(x){}};if(EMB){$('t-swap').classList.remove('hide')}refresh();clearInterval(connected.iv);connected.iv=setInterval(function(){if(!document.hidden)refresh()},45000)}
 function tabbing(boxId,fn){$(boxId).onclick=function(e){var b=e.target.closest('button');if(!b)return;[].forEach.call($(boxId).children,function(x){x.classList.toggle('on',x===b)});fn(b)}}
 tabbing('ctabs',function(b){var c=b.getAttribute('data-c');['gen','imp','watch'].forEach(function(k){$('c-'+k).classList.toggle('hide',k!==c)})});
 tabbing('tabs',function(b){var t=b.getAttribute('data-t');['bal','swap','pool','act'].forEach(function(k){$('t-'+k).classList.toggle('hide',k!==t)})});
@@ -238,7 +240,8 @@ $('pload').onclick=loadPool;$('da').oninput=estDep;$('db').oninput=estDep;$('dgo
 document.querySelectorAll('[data-pc]').forEach(function(b){b.onclick=function(){$('wp').value=b.getAttribute('data-pc');estWd()}});
 /* token list for picker */
 fetch('/api/sq/tokens?sort=vol24hxrp&dir=desc&limit=50').then(function(r){return r.json()}).then(function(d){(d.tokens||[]).slice(0,40).forEach(function(t){var a={c:t.currency,i:t.issuer,n:t.name||null};if(!TOK.some(function(x){return key(x)===key(a)})&&!PRESET.some(function(x){return key(x)===key(a)}))TOK.push(a)});if(ADDR){AS=AS.concat(TOK.filter(function(t){return !AS.some(function(a){return key(a)===key(t)})}));fillSel()}}).catch(function(){});
-var u=new URLSearchParams(location.search);if(u.get('pair')){}
+
+if(EMB){var _h=0;setInterval(function(){var h=document.documentElement.scrollHeight;if(h!==_h){_h=h;parent.postMessage({xdswap:h},'*')}},400)}
 connectLedger().then(loadXU).then(fillSel).catch(function(e){$('nt').textContent='offline';toast(e.message)});
 })();
 </script></body></html>
