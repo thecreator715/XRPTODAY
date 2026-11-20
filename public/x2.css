@@ -756,3 +756,12 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #vToken .tkt{left:6px;right:70px;top:4px;padding:4px 8px;font-size:10px;line-height:1.4;background:rgba(8,12,20,.82);backdrop-filter:blur(4px);border-radius:8px}
 #vToken .tkt b{display:block;margin:0;color:#c9d6f0}#vToken .tkt span{margin:0 8px 0 0}
 #vToken .tkleg{font-size:11px;flex-wrap:wrap}#vToken .tkax{font-size:10px}#vToken .tktm{font-size:9.5px;color:#7f90ad}
+
+/* v31 mobile token header: price beside name, address tucked left */
+#vToken .tkrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#vToken .tkrow h2{font-size:24px;min-width:0}
+#vToken .tkrow .tkpr{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;flex:0 0 auto}
+#vToken .tkrow .tkpr b{font-size:22px;line-height:1.1}
+#vToken .tkrow .tkpr #tkpx2{display:none}
+#vToken .tkrow .tkpr #tkpc{font-size:13px;white-space:nowrap}
+#vToken .tkid .tkcur{margin-left:-6px}
