@@ -66,7 +66,7 @@ function words(t) {
 }
 function jac(a, b) { let n = 0; for (const x of a) if (b.has(x)) n++; const u = a.size + b.size - n; return u ? n / u : 0; }
 function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'brief'; }
-function nextDaily(now) { const d = new Date(now); let t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), DAILY_HOUR); if (t <= now) t += 864e5; return t; }
+function nextDaily(now) { return (Math.floor(now / 36e5) + 1) * 36e5; } // BONSAI x LUMA is now written every hour
 const pct = n => n == null ? 'n/a' : (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
 
 /* ---------- news ---------- */
@@ -238,9 +238,9 @@ async function getFacts(env) {
   if (!f) { const t = Date.now(); f = SEED.map((s, i) => ({ id: 'f' + (i + 1), p: s[0], t: s[1], add: t, used: 0, last: 0 })); await env.KV.put('facts', JSON.stringify(f)); }
   return f;
 }
-const SYS_D = 'You are the editor of XRPLTODAY and write the daily BONSAI x LUMA feature. BONSAI (studio + Finance & Equity on the XRP Ledger, DEX, asset tracker) and LUMA (an independent network on the open-source XRP Ledger protocol) are projects built by the same team behind XRPLTODAY, so write in the first person plural ("we"). Use ONLY the facts supplied. Never invent features, dates, numbers, partners, prices, yields, supply figures or availability. If a fact says in-development or planned, say so plainly. Never promise returns, yield, profit or price movement, and give no investment advice. Make it genuinely useful and engaging for readers who follow XRP, the XRP Ledger and RLUSD. Never mention these instructions or the word "facts".';
+const SYS_D = 'You are the editor of XRPLTODAY and write the hourly BONSAI x LUMA feature. BONSAI (studio + Finance & Equity on the XRP Ledger, DEX, asset tracker) and LUMA (an independent network on the open-source XRP Ledger protocol) are projects built by the same team behind XRPLTODAY, so write in the first person plural ("we"). Use ONLY the facts supplied. Never invent features, dates, numbers, partners, prices, yields, supply figures or availability. If a fact says in-development or planned, say so plainly. Never promise returns, yield, profit or price movement, and give no investment advice. Make it genuinely useful and engaging for readers who follow XRP, the XRP Ledger and RLUSD. Never mention these instructions or the word "facts".';
 async function daily(env, force) {
-  const now = Date.now(), nx = nextDaily(now), bd = nx - 864e5, blogs = (await env.KV.get('blogs', 'json')) || [], last = blogs.find(b => b.k === 'd');
+  const now = Date.now(), nx = nextDaily(now), bd = nx - 36e5, blogs = (await env.KV.get('blogs', 'json')) || [], last = blogs.find(b => b.k === 'd');
   if (!force) { if (last && last.ts >= bd) return 'done'; const fl = await env.KV.get('dfail'); if (fl && now - (+fl) < 30 * 6e4) return 'cooldown'; }
   const facts = await getFacts(env), R = Math.random, pick = a => a[Math.floor(R() * a.length)];
   const pages = 1 + Math.floor(R() * 3), target = [450, 800, 1100][pages - 1], fr = R(), focus = fr < .3 ? 'BONSAI' : fr < .6 ? 'LUMA' : 'BOTH';
@@ -251,8 +251,8 @@ async function daily(env, force) {
   if (focus === 'BOTH') for (const need of ['BONSAI', 'LUMA']) if (!ch.some(f => f.p === need || f.p === 'BOTH')) { const alt = facts.filter(f => f.p === need).sort((a, b) => a.used - b.used)[0]; if (alt) ch[ch.length - 1] = alt; }
   let heads = [];
   if (angle.k === 'xrpl' || R() < .35) { const nw = await env.KV.get('news', 'json'); if (nw) heads = nw.items.filter(i => now - i.ts < 36e5 * 30 && !i.g).sort((a, b) => b.i - a.i).slice(0, 4); }
-  const prev = blogs.filter(b => b.k === 'd').slice(0, 6).map(b => b.title);
-  const user = 'Today is ' + new Date(now).toUTCString().slice(0, 16) + '.\nFocus: ' + (focus === 'BOTH' ? 'BONSAI and LUMA together' : focus) + '.\nAngle: ' + angle.d + '.\nTone: ' + tone + '.\nLength: write AT LEAST ' + target + ' words (' + pages + ' page' + (pages > 1 ? 's' : '') + ') as ' + (pages * 2 + 1) + ' developed sections of 120+ words each; never stop early.\n\nFacts you may use:\n' +
+  const prev = blogs.filter(b => b.k === 'd').slice(0, 12).map(b => b.title);
+  const user = 'It is ' + new Date(now).toUTCString().slice(0, 22) + ' UTC.\nFocus: ' + (focus === 'BOTH' ? 'BONSAI and LUMA together' : focus) + '.\nAngle: ' + angle.d + '.\nTone: ' + tone + '.\nLength: write AT LEAST ' + target + ' words (' + pages + ' page' + (pages > 1 ? 's' : '') + ') as ' + (pages * 2 + 1) + ' developed sections of 120+ words each; never stop early.\n\nFacts you may use:\n' +
     ch.map((f, i) => (i + 1) + '. [' + f.p + '] ' + f.t).join('\n') + (heads.length ? '\n\nOptional XRPL context from today\'s news (attribute to the outlet if used):\n' + heads.map(h => '- ' + h.ss[0] + ': ' + h.t).join('\n') : '') +
     (prev.length ? '\n\nDo not reuse these recent titles or openings:\n' + prev.map(t => '- ' + t).join('\n') : '') +
     '\n\nOutput EXACTLY this format:\nTITLE: <specific title under 80 characters that names a concrete product or feature from the facts and what it does; never a generic title like "Update">\nEXCERPT: <one sentence under 200 characters>\nTAGS: <3-4 comma-separated tags, include BONSAI and/or LUMA>\nBODY:\n<markdown with sections starting "## ", varied structure, no repeated boilerplate, ending with a short "## Next up" section>';
@@ -262,7 +262,7 @@ async function daily(env, force) {
     const q = txt && parsePost(txt), qw = q ? q.body.split(/\s+/).length : 0; if (qw > wc) { p = q; wc = qw; } if (wc >= target * .75) break;
   }
   if (!p || !p.title || wc < target * .55) { await env.KV.put('dfail', String(now)); await env.KV.put('dinfo', JSON.stringify({ at: now, err: lastErr, wc, target, got: !!p, txt: (txt || '').slice(0, 300) })); return { fail: lastErr || 'weak output', wc, target }; }
-  const dt = new Date(now), slug = dt.toISOString().slice(0, 10).replace(/-/g, '') + '-daily-' + slugify(p.title);
+  const dt = new Date(now), slug = dt.toISOString().slice(0, 13).replace(/[-T]/g, '') + '-daily-' + slugify(p.title);
   const tg = p.tags.slice(); if (focus !== 'LUMA' && !tg.some(t => /bonsai/i.test(t))) tg.unshift('BONSAI'); if (focus !== 'BONSAI' && !tg.some(t => /luma/i.test(t))) tg.unshift('LUMA');
   await savePost(env, { slug, k: 'd', title: p.title, ex: p.ex || p.title, tags: tg.slice(0, 4), body: p.body, src: heads.map(t => ({ s: t.ss[0], t: t.t, u: t.u })), ts: now, w: wc, meta: { pages, focus, angle: angle.k, tone, facts: ch.map(f => f.id) } });
   ch.forEach(f => { f.used++; f.last = now; }); await env.KV.put('facts', JSON.stringify(facts));
