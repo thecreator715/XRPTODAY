@@ -765,3 +765,14 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #vToken .tkrow .tkpr #tkpx2{display:none}
 #vToken .tkrow .tkpr #tkpc{font-size:13px;white-space:nowrap}
 #vToken .tkid .tkcur{margin-left:-6px}
+
+/* v32 */
+#vToken .tkrow{align-items:flex-start}
+#vToken .tkrow h2{white-space:nowrap;font-size:22px;line-height:1.15}
+#vToken .tkrow h2 .ver{display:inline;margin-left:6px;font-size:12px}
+#vToken .tkrow .tkpr b{font-size:19px}
+#vToken .tkrow .tkpr #tkpu{font-size:11px}
+#vToken .tkrow .tkpr #tkpx2{display:block;font-size:12px;margin:0}
+#vToken .tkrow .tkpr #tkpc{font-size:12px}
+#vToken .tkid .tkcur{margin-left:0;font-size:11.5px;white-space:nowrap;line-height:1.4}
+#vToken .tkid .tkcur .cp{padding:0;margin:0;background:none;border:0;color:inherit;font:inherit}
