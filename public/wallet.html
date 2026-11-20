@@ -38,6 +38,27 @@ td{padding:10px 8px;border-top:1px solid var(--line);text-align:right;font-size:
 .hide{display:none!important}.pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(61,139,255,.18);color:var(--cyan);margin-left:6px;vertical-align:middle}
 .sw{display:flex;justify-content:center;margin:4px 0}.sw button{border-radius:999px;padding:6px 12px}
 body.embed header,body.embed h1,body.embed h1+.mu,body.embed .wrap>.mu.sm,body.embed #tabs,body.embed #sum,body.embed #t-bal,body.embed #t-pool,body.embed #t-act{display:none!important}body.embed .wrap{padding:0}body.embed{background:transparent}body.embed .card{margin:0;border:0;padding:4px 0;background:none}body.embed .card h3{display:none}body.embed #t-swap>.card{max-width:none}
+html.embed,html.embed body{background:transparent!important}:root{color-scheme:dark}
+.sw2{position:relative;max-width:520px;margin:0 auto 12px;padding:16px;border-radius:22px;border:1px solid rgba(89,198,255,.2);background:linear-gradient(180deg,rgba(61,139,255,.10),rgba(10,16,30,.0) 45%),rgba(10,16,30,.72);box-shadow:0 24px 70px rgba(20,60,160,.28),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(8px)}
+body.embed .sw2{padding:14px;margin:0;max-width:none}
+.swh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}.swh b{font-size:17px;letter-spacing:-.3px}
+.pbadge{font-size:10.5px;background:rgba(53,214,160,.1);color:var(--up);padding:3px 9px;border-radius:999px;margin-left:8px;border:1px solid rgba(53,214,160,.25);font-weight:600}
+.slipg{display:flex;gap:4px;align-items:center;font-size:11px;color:var(--dim)}.slipg button{padding:4px 8px;font-size:11px;border-radius:8px;background:#0b1424}.slipg button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.box{background:rgba(5,9,18,.75);border:1px solid var(--line);border-radius:16px;padding:12px 14px;transition:border-color .2s,box-shadow .2s}.box:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(61,139,255,.16)}
+.bt{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+.qk button{padding:3px 9px;font-size:10.5px;border-radius:999px;margin-left:4px;background:rgba(61,139,255,.12);border-color:rgba(61,139,255,.3);color:var(--cyan)}
+.br{display:flex;gap:10px;align-items:center;margin:6px 0 2px}.br input{background:transparent;border:0;padding:0;font:700 26px 'JetBrains Mono',ui-monospace,monospace;min-width:0;flex:1;box-shadow:none}.br input::placeholder{color:#34435f}
+.br select{width:auto;max-width:46%;flex:0 0 auto;border-radius:999px;padding:8px 12px;font-weight:700;background:#101a30;border:1px solid var(--line)}
+.bb{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--mu)}
+.swm{display:flex;justify-content:center;margin:-13px 0;position:relative;z-index:2}.swm button{width:40px;height:40px;border-radius:12px;padding:0;background:#0d1a33;border:3px solid #0a1220;color:var(--cyan);font-size:18px;transition:transform .25s}.swm button:hover{transform:rotate(180deg)}
+.est2{margin:14px 0 12px;font-size:13px}.est2 .idle{color:var(--mu);text-align:center;padding:6px 0}
+.est2 .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.est2 .chip{border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:rgba(255,255,255,.02);min-width:0}.chip small{display:block;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}.chip b{display:block;font:600 12.5px 'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.gauge{height:6px;border-radius:6px;background:#0a1220;overflow:hidden;margin:12px 0 4px}.gauge i{display:block;height:100%;border-radius:6px;transition:width .35s}
+.gl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim)}
+.g2x{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;margin-top:10px;font-size:12px}.g2x div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed rgba(255,255,255,.07);padding:5px 0}.g2x span{color:var(--mu)}.g2x b{font:500 11.5px 'JetBrains Mono',monospace;text-align:right;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:560px){.g2x{grid-template-columns:1fr}}
+.go{width:100%;padding:15px;border-radius:16px;font-size:16px;font-weight:800;background:linear-gradient(135deg,#2a63f0,#4fb4ff);border:0;color:#fff;box-shadow:0 10px 30px rgba(42,99,240,.45);letter-spacing:.2px}.go:disabled{background:#16223d;box-shadow:none;color:#6b7da0}
+.adv summary{cursor:pointer;color:var(--mu);font-size:12px;margin-top:14px}.fine{color:var(--dim);font-size:11px;margin:12px 0 0}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#12203d;border:1px solid var(--blue);padding:10px 16px;border-radius:12px;z-index:9;max-width:92vw;display:none}
 </style></head><body>
 <div class="wrap">
@@ -60,15 +81,20 @@ body.embed header,body.embed h1,body.embed h1+.mu,body.embed .wrap>.mu.sm,body.e
 
  <div id="t-bal"><div class="card"><h3>Tokens & LP tokens</h3><div class="tw"><table id="bt"></table></div><p class="mu sm" id="bnote"></p></div></div>
 
- <div id="t-swap" class="hide"><div class="card" style="max-width:560px;margin-left:auto;margin-right:auto"><h3>Swap through an AMM pool</h3>
-  <label>From</label><div class="row"><input id="sfa" inputmode="decimal" placeholder="0.0"><select id="sf" class="fx" style="width:48%"></select></div><div class="mu sm" id="sfb"></div>
-  <div class="sw"><button id="sflip" title="Flip">⇅</button></div>
-  <label>To (estimate)</label><div class="row"><input id="sta" readonly placeholder="0.0"><select id="st" class="fx" style="width:48%"></select></div>
-  <label>Pool not listed? Add any token by issuer and currency</label><div class="row"><input id="cust" placeholder="issuer r… + currency, e.g. rhCAT4hR…:FUZZY"><button class="fx" id="custb">Add</button></div>
-  <label>Slippage tolerance</label><div class="row"><select id="slip"><option>0.1</option><option selected>0.5</option><option>1</option><option>3</option></select></div>
-  <div class="est" id="sest"><div><span>Enter an amount to see the estimate</span></div></div>
-  <button class="pri" style="width:100%" id="sgo" disabled>Swap</button>
-  <p class="mu sm" style="margin-top:10px">A 1% platform fee is charged in XRP, equal to 1% of the swap’s value, and is shown in the estimate before you confirm.</p></div></div>
+ <div id="t-swap" class="hide"><div class="card sw2">
+  <div class="swh"><div><b>Swap</b><span id="spool" class="pbadge">AMM pool</span></div><div class="slipg" id="slipg"><span>Slippage</span><button data-s="0.1">0.1%</button><button data-s="0.5" class="on">0.5%</button><button data-s="1">1%</button><button data-s="3">3%</button></div></div>
+  <select id="slip" class="hide"><option>0.1</option><option selected>0.5</option><option>1</option><option>3</option></select>
+  <div class="box"><div class="bt"><span>You pay</span><span class="qk" id="qk"><button data-q="25">25%</button><button data-q="50">50%</button><button data-q="max">MAX</button></span></div>
+   <div class="br"><input id="sfa" inputmode="decimal" placeholder="0.0" autocomplete="off"><select id="sf"></select></div>
+   <div class="bb"><span id="sfu">≈ $0.00</span><span id="sfb"></span></div></div>
+  <div class="swm"><button id="sflip" title="Flip">⇅</button></div>
+  <div class="box"><div class="bt"><span>You receive (estimate)</span><span id="spx"></span></div>
+   <div class="br"><input id="sta" readonly placeholder="0.0"><select id="st"></select></div>
+   <div class="bb"><span id="stu">≈ $0.00</span><span id="smin"></span></div></div>
+  <div class="est2" id="sest"><div class="idle">Enter an amount to see the estimate</div></div>
+  <button class="go" id="sgo" disabled>Enter an amount</button>
+  <details class="adv"><summary>Pool not listed? Add any token</summary><div class="row" style="margin-top:8px"><input id="cust" placeholder="issuer r… : currency, e.g. rhCAT4hR…:FUZZY"><button class="fx" id="custb">Add</button></div></details>
+  <p class="fine">A 1% platform fee is charged in XRP (1% of the swap value) and is shown in the estimate before you confirm. Estimates use live pool reserves and can move before your transaction lands.</p></div></div>
 
  <div id="t-pool" class="hide"><div class="grid g2">
   <div class="card"><h3>Pool</h3>
@@ -99,7 +125,7 @@ body.embed header,body.embed h1,body.embed h1+.mu,body.embed .wrap>.mu.sm,body.e
 (function(){
 var FEE_ADDR='rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M',FEE_PCT=0.01;
 var $=function(i){return document.getElementById(i)},cl=null,W=null,ADDR='',WATCH=false,XU=0,XRPB=0,RES={base:1,inc:0.2},OWN=0;
-var QS=new URLSearchParams(location.search),EMB=QS.get('embed')==='1',INIT=null;if(EMB)document.body.classList.add('embed');var AS=[{c:'XRP',i:'',n:'XRP'}],AMMC={},PXC={},LINES=[],POOL=null,TOK=[];
+var QS=new URLSearchParams(location.search),EMB=QS.get('embed')==='1',INIT=null;if(EMB){document.body.classList.add('embed');document.documentElement.classList.add('embed')}var AS=[{c:'XRP',i:'',n:'XRP'}],AMMC={},PXC={},LINES=[],POOL=null,TOK=[];
 var PRESET=[{c:'46555A5A59000000000000000000000000000000',i:'rhCAT4hRdi2Y9puNdkpMzxrdKa5wkppR62',n:'FUZZY'},{c:'524C555344000000000000000000000000000000',i:'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De',n:'RLUSD'},{c:'5553444300000000000000000000000000000000',i:'rGm7WCVp9gb4jZHWTEtGUr4dd74z2XuWhE',n:'USDC'}];
 if(QS.get('to')&&QS.get('to').indexOf(':')>0){var _q=QS.get('to').split(':');INIT={c:_q[1],i:_q[0],n:QS.get('name')||null}}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -137,6 +163,7 @@ function loadAcct(){return req({command:'account_info',account:ADDR,ledger_index
 function updateAct(){var b=$('actb'),was=updateAct.w,st=$('wst');if(st){st.textContent=ACTIVE?'● Active':'● Inactive';st.style.color=ACTIVE?'var(--up)':'var(--warn)'}
  if(!ACTIVE){b.className='note';b.innerHTML='<b>Wallet not activated yet.</b> Send at least '+RES.base+' XRP to this address to activate it. Until then it has no balance and cannot swap.<div class="seed" style="margin-top:8px">'+esc(ADDR)+'</div><div class="row" style="margin-top:8px"><button id="cpad">Copy address</button></div>';$('cpad').onclick=function(){try{navigator.clipboard.writeText(ADDR);toast('Address copied')}catch(e){}}}
  else{b.className='hide';b.innerHTML='';if(was===false)toast('Wallet activated ✓')}updateAct.w=ACTIVE}
+function classify(){return Promise.all(LINES.map(function(l){if(!/^0[3]/.test(l.currency)||!/^[0-9A-F]{40}$/i.test(l.currency))return Promise.resolve(null);return req({command:'amm_info',amm_account:l.account,ledger_index:'validated'}).then(function(r){var m=r.amm;return {A:{c:m.amount.currency||'XRP',i:m.amount.issuer||'',v:val(m.amount)},B:{c:m.amount2.currency||'XRP',i:m.amount2.issuer||'',v:val(m.amount2)},lp:+m.lp_token.value,fee:(m.trading_fee||0)/100000,acct:m.account}}).catch(function(){return null})}))}
 function baseKey(){return 'xwl:'+ADDR}
 function loadBase(){try{return JSON.parse(localStorage.getItem(baseKey()))||null}catch(e){return null}}
 function refresh(){if(!ADDR||!cl)return Promise.resolve();return loadXU().then(loadAcct).then(function(){return classify()}).then(function(cls){
@@ -166,18 +193,25 @@ function sBal(){var a=AS[+$('sf').value];if(a)$('sfb').textContent='Balance: '+n
 var SQ=null,SQN=0;
 function swapOut(p,fromA,dx){var inIsA=key(p.asset)===key(fromA),x=inIsA?p.a:p.b,y=inIsA?p.b:p.a,dxe=dx*(1-p.fee),out=y*dxe/(x+dxe),spot=y/x,exec=out/dx;return {out:out,spot:spot,exec:exec,impact:spot>0?(1-exec/spot)*100:0}}
 function estSwap(){var seq=++SQN,a=AS[+$('sf').value],b=AS[+$('st').value],v=parseFloat($('sfa').value);sBal();$('sgo').disabled=true;SQ=null;
- if(!a||!b||!isFinite(v)||v<=0){$('sest').innerHTML='<div><span>Enter an amount to see the estimate</span></div>';$('sta').value='';return}
- if(key(a)===key(b)){$('sest').innerHTML='<div><span>Pick two different assets</span></div>';return}
- $('sest').innerHTML='<div><span>Fetching pool…</span></div>';
- Promise.all([ammInfo(a,b),pxXrp(a),pxXrp(b)]).then(function(r){if(seq!==SQN)return;var p=r[0];if(!p){$('sest').innerHTML='<div><span class="wr">No AMM pool exists for '+esc(lbl(a))+' / '+esc(lbl(b))+'. Choose a pair that has a pool.</span></div>';$('sta').value='';return}
+ if(!a||!b||!isFinite(v)||v<=0){$('sest').innerHTML='<div class="idle">Enter an amount to see the estimate</div>';$('sta').value='';$('sgo').textContent='Enter an amount';$('sfu').textContent='≈ $0.00';$('stu').textContent='≈ $0.00';$('smin').textContent='';return}
+ if(key(a)===key(b)){$('sest').innerHTML='<div class="idle">Pick two different assets</div>';$('sgo').textContent='Pick two assets';return}
+ $('sest').innerHTML='<div class="idle">Fetching live pool…</div>';
+ Promise.all([ammInfo(a,b),pxXrp(a),pxXrp(b)]).then(function(r){if(seq!==SQN)return;var p=r[0];if(!p){$('sest').innerHTML='<div class="idle wr">No AMM pool exists for '+esc(lbl(a))+' / '+esc(lbl(b))+'. Choose a pair that has a pool.</div>';$('sta').value='';$('sgo').textContent='No pool';$('spool').textContent='no pool';return}
   var o=swapOut(p,a,v),slip=+$('slip').value/100,min=o.out*(1-slip),vx=a.c==='XRP'?v:(r[1]!=null?v*r[1]:(r[2]!=null?o.out*r[2]:null));
-  if(vx==null){$('sest').innerHTML='<div><span class="wr">Cannot value this swap in XRP, so the 1% fee cannot be calculated. Use a token that has an XRP pool.</span></div>';return}
+  if(vx==null){$('sest').innerHTML='<div class="idle wr">Cannot value this swap in XRP, so the 1% fee cannot be calculated. Use a token that has an XRP pool.</div>';$('sgo').textContent='Cannot price';return}
   var feeX=FEEP(vx),have=bal(a),needX=(a.c==='XRP'?v:0)+feeX+0.0002;
   $('sta').value=fx(+o.out.toPrecision(8));
   var ok=true,msg='';if(v>have){ok=false;msg='Insufficient '+lbl(a)+' balance.'}else if(a.c==='XRP'&&needX>xrpAvail()){ok=false;msg='Not enough spendable XRP for the swap plus the 1% fee.'}else if(a.c!=='XRP'&&(feeX+0.0002)>xrpAvail()){ok=false;msg='You need a little spendable XRP for the 1% fee and network fees.'}
   if(WATCH){ok=false;msg='Watch-only wallet: import the seed to swap.'}
-  $('sest').innerHTML=row('Rate','1 '+lbl(a)+' ≈ '+nf(o.exec,8)+' '+lbl(b))+row('You receive (est.)',nf(o.out,8)+' '+lbl(b)+' ('+usd((b.c==='XRP'?o.out:(r[2]!=null?o.out*r[2]:NaN))*XU)+')')+row('Minimum received',nf(min,8)+' '+lbl(b))+row('Price impact',(o.impact<0.01?'<0.01':o.impact.toFixed(2))+'%'+(o.impact>3?' ⚠':''))+row('Pool fee',(p.fee*100).toFixed(2)+'%')+row('Spot price (before trade)','1 '+lbl(a)+' = '+nf(o.spot,8)+' '+lbl(b))+row('Pool reserves',nf(key(p.asset)===key(a)?p.a:p.b)+' '+lbl(a)+' / '+nf(key(p.asset)===key(a)?p.b:p.a)+' '+lbl(b))+row('Trade size vs pool',(v/(key(p.asset)===key(a)?p.a:p.b)*100).toFixed(3)+'%')+row('Route','Direct AMM pool '+p.acct.slice(0,6)+'…')+row('Platform fee (1%)',feeX>0?nf(feeX,6)+' XRP ('+usd(feeX*XU)+')':'waived (this is the fee wallet)')+row('Network fee','≈ 0.00002 XRP')+(msg?'<div><span class="dn">'+msg+'</span></div>':'');
-  SQ={a:a,b:b,v:v,p:p,min:min,out:o.out,feeX:feeX};$('sgo').disabled=!ok}).catch(function(e){if(seq===SQN)$('sest').innerHTML='<div><span class="dn">'+esc(e&&e.message||e)+'</span></div>'})}
+  var ra=key(p.asset)===key(a)?p.a:p.b,rb=key(p.asset)===key(a)?p.b:p.a,xs=p.asset.c==='XRP'?p.a:(p.asset2.c==='XRP'?p.b:null),tvl=xs!=null?xs*2:null,outv=b.c==='XRP'?o.out:(r[2]!=null?o.out*r[2]:null),ic=o.impact<1?'#35d6a0':(o.impact<3?'#ffc850':'#ff5d73');
+  $('sfu').textContent='≈ '+usd(vx*XU);$('stu').textContent=outv!=null?'≈ '+usd(outv*XU):'';$('smin').textContent='min '+nf(min,6);$('spool').textContent='AMM · fee '+(p.fee*100).toFixed(2)+'%'+(tvl!=null?' · TVL '+usd(tvl*XU):'');
+  $('spx').innerHTML='<span class="mu">1 '+esc(lbl(a))+' ≈ '+nf(o.exec,6)+' '+esc(lbl(b))+'</span>';
+  $('sest').innerHTML='<div class="chips"><div class="chip"><small>Price impact</small><b style="color:'+ic+'">'+(o.impact<0.01?'<0.01':o.impact.toFixed(2))+'%'+(o.impact>3?' ⚠':'')+'</b></div><div class="chip"><small>Min received</small><b>'+nf(min,6)+'</b></div><div class="chip"><small>Platform fee</small><b>'+(feeX>0?nf(feeX,5)+' XRP':'waived')+'</b></div></div>'
+   +'<div class="gauge"><i style="width:'+Math.min(100,o.impact/5*100).toFixed(1)+'%;background:'+ic+'"></i></div><div class="gl"><span>0%</span><span>price impact</span><span>5%+</span></div>'
+   +'<div class="g2x">'+row('Rate','1 '+esc(lbl(a))+' = '+nf(o.exec,8)+' '+esc(lbl(b)))+row('Spot price','1 '+esc(lbl(a))+' = '+nf(o.spot,8)+' '+esc(lbl(b)))+row('Pool reserves',nf(ra)+' / '+nf(rb))+row('Trade vs pool',(v/ra*100).toFixed(3)+'%')+row('Pool fee',(p.fee*100).toFixed(2)+'%')+row('Route','AMM '+esc(p.acct.slice(0,6))+'…')+row('Fee value',feeX>0?usd(feeX*XU):'—')+row('Network fee','≈ 0.00002 XRP')+'</div>'
+   +(msg?'<div class="dn" style="margin-top:10px;text-align:center">'+msg+'</div>':'');
+  $('sgo').textContent=ok?'Swap '+lbl(a)+' → '+lbl(b):(WATCH?'Watch-only wallet':'Cannot swap');
+  SQ={a:a,b:b,v:v,p:p,min:min,out:o.out,feeX:feeX};$('sgo').disabled=!ok}).catch(function(e){if(seq===SQN){$('sest').innerHTML='<div class="idle dn">'+esc(e&&e.message||e)+'</div>';$('sgo').textContent='Retry shortly'}})}
 function row(a,b){return '<div><span>'+a+'</span><b>'+b+'</b></div>'}
 function hasLine(b){return b.c==='XRP'||LINES.some(function(x){return x.currency===b.c&&x.account===b.i})}
 function submit(tx,note){return cl.submitAndWait(tx,{wallet:W,autofill:true,failHard:true}).then(function(r){var m=r.result.meta,res=m&&m.TransactionResult;log(note,res,r.result.hash);if(res!=='tesSUCCESS')throw new Error(note+' failed: '+res);return r.result})}
@@ -245,6 +279,8 @@ $('imp').onclick=function(){var s=$('seed').value.trim().split(/[ \n]+/).join(' 
 $('wat').onclick=function(){var a=$('addr').value.trim();if(!xrpl.isValidClassicAddress(a)){toast('Enter a valid r-address');return}remember({a:a});connected(a,null,true)};
 $('disc').onclick=function(){try{localStorage.removeItem('xwl:sess')}catch(e){}W=null;ADDR='';location.reload()};
 $('sfa').oninput=estSwap;$('sf').onchange=estSwap;$('st').onchange=estSwap;$('slip').onchange=function(){estSwap();estWd()};$('sgo').onclick=doSwap;
+$('slipg').onclick=function(e){var b=e.target.closest('button');if(!b)return;[].forEach.call($('slipg').querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)});$('slip').value=b.getAttribute('data-s');estSwap();estWd()};
+$('qk').onclick=function(e){var b=e.target.closest('button');if(!b)return;var a=AS[+$('sf').value];if(!a)return;var q=b.getAttribute('data-q'),h=bal(a);var v=q==='max'?(a.c==='XRP'?Math.max(0,(h-0.001)/1.01):h):h*(+q/100);$('sfa').value=v>0?fx(+v.toPrecision(10)):'';estSwap()};
 $('sflip').onclick=function(){var a=$('sf').value;$('sf').value=$('st').value;$('st').value=a;estSwap()};
 $('custb').onclick=function(){var v=$('cust').value.trim(),m=v.match(/^(r[1-9A-HJ-NP-Za-km-z]{24,34})[:\s\/-]+([A-Za-z0-9]{3,40})$/);if(!m){toast('Use the format r…issuer:CURRENCY');return}var c=m[2];if(c.length<40&&c.length!==3){var h='';for(var i=0;i<c.length;i++)h+=c.charCodeAt(i).toString(16).toUpperCase().padStart(2,'0');c=h.padEnd(40,'0')}else if(c.length===3){c=c.toUpperCase()}
  var t={c:c,i:m[1],n:m[2].length<=20?m[2]:null};if(!AS.some(function(a){return key(a)===key(t)}))TOK.push(t),AS.push(t);fillSel();$('st').value=String(AS.findIndex(function(a){return key(a)===key(t)}));$('cust').value='';estSwap()};
