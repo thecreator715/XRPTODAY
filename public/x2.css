@@ -805,3 +805,12 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 /* v36 issuer flush-left under name */
 #vToken .tkid .tkcur,#vToken .tkrow .tkcur{justify-self:start!important;width:auto!important;text-align:left!important;padding:0!important;margin:2px 0 0 0!important;display:flex!important;justify-content:flex-start!important}
 #vToken .tkcur .cp{padding:0!important;margin:0!important;text-align:left!important;display:inline-flex!important;width:auto!important;background:none!important;border:0!important;letter-spacing:0}
+
+/* v37 rows hug content; issuer flush-left beside USD line */
+@media(max-width:759px){
+#vToken .tkrow{grid-template-rows:auto auto!important;align-content:start!important;align-items:start!important}
+#vToken .tkrow h2{align-self:start}
+#vToken .tkrow .tkcur{align-self:start!important;margin:-2px 0 0 0!important;padding:0!important;text-indent:0!important;margin-inline:0!important;padding-inline:0!important;position:static!important;left:auto!important;transform:none!important}
+#vToken .tkrow .tkcur::before,#vToken .tkrow .tkcur::after{content:none!important}
+#vToken .tkrow .tkcur .cp{margin:0!important;padding:0!important;text-indent:0!important;min-width:0!important}
+}
