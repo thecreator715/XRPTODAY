@@ -785,3 +785,11 @@ a.back,.back{display:inline-flex;align-items:center;gap:6px;margin:18px 0 14px;p
 #vToken .tkrow{width:100%;display:flex;justify-content:space-between;align-items:flex-start}
 #vToken .tkrow .tkpr{margin-left:auto;align-items:flex-end;text-align:right}
 }
+
+/* v34 fill toolbar rows; address tucked under name */
+#vToken .tkct{display:flex;flex-wrap:wrap;gap:8px}
+#vToken .tkct .seg2{flex:1 1 auto;display:flex;justify-content:stretch}
+#vToken .tkct .seg2 .chip2{flex:1 1 0;text-align:center;justify-content:center}
+#vToken .tkct .sp{display:none}
+#vToken .tkid .tkcur{display:flex!important;justify-content:flex-start!important;align-items:center;gap:6px;margin:2px 0 0 0!important;text-align:left}
+#vToken .tkid .tkcur .cp{margin:0!important}
