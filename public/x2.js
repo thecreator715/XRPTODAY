@@ -467,3 +467,6 @@ window.XDpay=function(o){
 /* fit sidebar to viewport height (no scrolling) */
 (function(){function fit(){var s=document.getElementById('side');if(!s)return;var k=[].slice.call(s.children),z=1;k.forEach(function(c){c.style.zoom=''});if(innerWidth<=760)return;for(var i=0;i<8&&s.scrollHeight>s.clientHeight+1;i++){z=Math.max(.55,z*(s.clientHeight/s.scrollHeight)-.005);k.forEach(function(c){c.style.zoom=z});if(z<=.55)break}}
 window.addEventListener('resize',fit);setInterval(fit,2000);setTimeout(fit,300);setTimeout(fit,1500)})();
+
+/* upgrade small feed thumbnails to the article's full-size cover (fixes blurry images) */
+(function(){var C={};document.addEventListener('load',function(e){var t=e.target;if(!t||t.tagName!=='IMG'||!t.classList||!t.classList.contains('cvr')||t.__up)return;if(!(t.naturalWidth&&t.naturalWidth<480))return;t.__up=1;var u=t.getAttribute('data-u');if(!u)return;(C[u]!==undefined?Promise.resolve({im:C[u]}):fetch('/api/cover?u='+encodeURIComponent(u)).then(function(r){return r.json()})).then(function(d){var im=d&&d.im||'';C[u]=im;if(!im||im===t.currentSrc||im===t.src)return;var g=new Image();g.referrerPolicy='no-referrer';g.onload=function(){if(g.naturalWidth>t.naturalWidth&&t.parentNode)t.src=im};g.src=im}).catch(function(){})},true)})();

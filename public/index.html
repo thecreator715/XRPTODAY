@@ -316,7 +316,7 @@ function renderFeed(){
     var nw=S.seen&&!S.seen[it.id]?' new':'';
     h+='<a data-id="'+esc(it.id)+'" class="row'+(it.i>=70?' hot':'')+nw+'" href="'+esc(it.u)+'" target="_blank" rel="noopener noreferrer">'+
       '<div class="meta"><span class="age mono">'+ago(it.ts)+'</span><span class="src">'+esc(it.s)+'</span>'+(it.n>1?'<span class="more">+'+(it.n-1)+' sources</span>':'')+tg+'</div>'+
-      '<div class="hl">'+esc(it.t)+'</div>'+(it.im?'<img class="cvr" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="" src="'+esc(it.im)+'" onerror="this.remove()">':'<div class="cvr ph" data-cv="'+esc(it.u)+'"></div>')+'</a>'}
+      '<div class="hl">'+esc(it.t)+'</div>'+(it.im?'<img class="cvr" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="" data-u="'+esc(it.u)+'" src="'+esc(it.im)+'" onerror="this.remove()">':'<div class="cvr ph" data-cv="'+esc(it.u)+'"></div>')+'</a>'}
   if(!a.length)h='<div class="empty">No stories match these filters yet.<br><small>Try another tab or clear the search.</small></div>';
   if(a.length>n)h+='<button class="loadmore" id="lm">Show more ('+(a.length-n)+')</button>';
   $('feed').innerHTML=h;$('cnt').textContent=a.length+' stories';
