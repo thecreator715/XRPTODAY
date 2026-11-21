@@ -494,6 +494,8 @@ async function admin(req, env) {
   }
   if (b.action === 'remove') { const n = facts.filter(f => f.id !== b.id); await env.KV.put('facts', JSON.stringify(n)); return J({ ok: 1, left: n.length }); }
   if (/^ad-/.test(b.action || '')) return await adsAdmin(b, env);
+  if (b.action === 'seo-get') return J({ seo: (await env.KV.get('seo', 'json')) || {} }, 200, { 'cache-control': 'no-store' });
+  if (b.action === 'seo-set') { const o = {}; for (const k of ['gsc', 'ga4', 'bing', 'site']) o[k] = String(b[k] || '').trim().slice(0, 200); await env.KV.put('seo', JSON.stringify(o)); return J({ ok: 1 }); }
   if (b.action === 'an-get') return await anGet(b, env);
   if (/^tn-/.test(b.action || '')) return await tnAdmin(b, env);
   if (/^ctl-/.test(b.action || '')) return await ctlAdmin(b, env);
@@ -535,6 +537,13 @@ async function page(env, u, ua) {
       h = h.replace(/<title>[\s\S]*?<\/title>/, () => '<title>' + esc(it.t) + ' — XRPLTODAY</title>').replace('<meta property="og:title" content="XRPLTODAY — Live XRP, XRPL &amp; RLUSD News Terminal"><meta property="og:type" content="website">', () => mt);
     }
   }
+  { const S = (await env.KV.get('seo', 'json').catch(() => null)) || {}, ok = /^[A-Za-z0-9_\-:.]+$/; let t = '';
+    if (S.gsc && ok.test(S.gsc)) t += '<meta name="google-site-verification" content="' + S.gsc + '">';
+    if (S.bing && ok.test(S.bing)) t += '<meta name="msvalidate.01" content="' + S.bing + '">';
+    const base = (S.site && /^https?:\/\/[^\s"<>]+$/.test(S.site)) ? S.site.replace(/\/$/, '') : u.origin;
+    if (!/rel="canonical"/.test(h)) t += '<link rel="canonical" href="' + base + u.pathname + '">';
+    if (S.ga4 && /^G-[A-Z0-9]{4,14}$/.test(S.ga4)) t += '<script async src="https://www.googletagmanager.com/gtag/js?id=' + S.ga4 + '"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","' + S.ga4 + '")</script>';
+    if (t) h = h.replace('</head>', () => t + '</head>'); }
   return new Response(h, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'public, max-age=60' } });
 }
 /* ---- XRPL Squares: token data proxy (xrpl.to) ---- */
@@ -794,6 +803,14 @@ async function anGet(b, env) {
   const rows = await Promise.all(keys.map(k => env.KV.get('an:' + k, 'json')));
   return J({ days: keys.map((k, i) => { const d = rows[i] || {}; return { d: k, v: d.v || 0, u: d.u || 0, pv: d.pv || 0, dur: d.dur || 0, h: d.h || [], pg: d.pg || {}, rf: d.rf || {}, ev: d.ev || {}, dv: d.dv || {}, live: Object.keys(d.live || {}).filter(x => now - d.live[x] < 90000).length }; }) }, 200, { 'cache-control': 'no-store' });
 }
+async function sitemap(env, u) {
+  const S = (await env.KV.get('seo', 'json').catch(() => null)) || {}, base = (S.site && /^https?:\/\/[^\s"<>]+$/.test(S.site)) ? S.site.replace(/\/$/, '') : u.origin, x = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const st = ['/', '/blog', '/daily', '/top', '/world', '/stocks', '/metals', '/ai', '/tokens', '/squares', '/stats', '/advertise'].map(p => [p, 'hourly']);
+  const bl = ((await env.KV.get('blogs', 'json').catch(() => null)) || []).slice(0, 400).map(b => ['/blog/' + encodeURIComponent(b.slug), 'monthly']);
+  const tn = ((await env.KV.get('tn', 'json').catch(() => null)) || []).filter(s => s.status === 'approved').slice(0, 200).map(s => ['/tokens/' + encodeURIComponent(s.slug), 'weekly']);
+  const body = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + st.concat(bl, tn).map(([p, f]) => '<url><loc>' + x(base + p) + '</loc><changefreq>' + f + '</changefreq></url>').join('') + '</urlset>';
+  return new Response(body, { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=900' } });
+}
 export default {
   async fetch(req, env, ctx) {
     const u = new URL(req.url), p = u.pathname;
@@ -824,7 +841,8 @@ export default {
       if (p === '/tn.js') return new Response((await env.KV.get('tnjs')) || TNJS, { headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=120' } });
       if (p === '/api/admin') return await admin(req, env);
       if (p === '/rss.xml') return await rss(env, u);
-      if (p === '/robots.txt') return new Response('User-agent: *\nAllow: /\nSitemap: ' + u.origin + '/rss.xml\n');
+      if (p === '/sitemap.xml') return await sitemap(env, u);
+      if (p === '/robots.txt') return new Response('User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: ' + u.origin + '/sitemap.xml\nSitemap: ' + u.origin + '/rss.xml\n');
       return await page(env, u, req.headers.get('user-agent') || '');
     } catch (e) { return J({ error: String(e.message || e) }, 500); }
   },
