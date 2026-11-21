@@ -864,3 +864,14 @@ body{background-image:radial-gradient(1000px 650px at 0% 0%,rgba(61,139,255,.11)
 header.top,.topbar,.tb,.ticker,.foot{background-image:linear-gradient(90deg,rgba(61,139,255,.07),rgba(120,90,255,.05),rgba(20,200,170,.05))!important}
 /* v43 sidebar fits without scrolling */
 @media(min-width:761px){.side{overflow:hidden!important;padding-top:10px!important;padding-bottom:8px!important}.side .nav{padding:5px 12px!important}.side .sec{padding:9px 10px 4px!important}.side .spb{padding:6px 10px!important;margin:0 0 5px!important;gap:1px!important}.side .spb small,.side .spb i{display:none!important}.side .spb b{font-size:13px!important}.side .spb .tag{font-size:9px!important}.side #spons{margin:0!important}.side .rsscard{display:none!important}.side .brand{margin-bottom:0!important;padding-top:0!important;padding-bottom:6px!important}}
+/*v45 logo*/
+.top h1#title{background:none!important;-webkit-text-fill-color:initial!important}
+.top h1#title::before{color:#fff!important;-webkit-text-fill-color:#fff!important}
+[data-theme=light] .top h1#title::before{color:#0d1524!important;-webkit-text-fill-color:#0d1524!important}
+.top h1#title::after{-webkit-text-fill-color:transparent!important}
+
+/*v46 gap*/
+body.compact .strip{margin:0!important;display:none!important}
+@media(max-width:760px){.ticker{margin-bottom:2px!important}.strip{margin:6px 0 4px!important}#vNews>.search{margin-top:0!important}.top{margin-bottom:0!important}}
+/*v48 scroll*/
+@media(pointer:coarse),(max-width:760px){.ch,.ch *,#tkchart,#tkchart *,.tkp2 svg{touch-action:pan-y pinch-zoom!important}html.emb,html.emb body{overflow:hidden!important;height:auto!important;touch-action:pan-y}}

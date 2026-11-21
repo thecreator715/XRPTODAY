@@ -105,6 +105,29 @@ html.embed body{background-image:none!important}
 @media(max-width:560px){#pmod{align-items:flex-end;padding:0}.pmb{border-radius:22px 22px 0 0;width:100%;padding:16px 14px calc(16px + env(safe-area-inset-bottom))}}
 body.embed.pmopen>*:not(#pmod):not(script):not(style){visibility:hidden!important}body.embed #pmod{background:transparent!important;backdrop-filter:none!important}
 @media(max-width:560px){#pmod{align-items:stretch;padding:0}.pmb{height:100vh;height:100dvh;max-height:none;border-radius:0;width:100%;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 12px);overflow:hidden}.pmh{margin-bottom:8px}.pmsteps{margin-bottom:6px}.pmb .est{flex:1 1 auto;min-height:0;overflow:auto;margin:0 0 8px;padding:6px 10px;font-size:12.5px}.pmb .est div{padding:2px 0}.pmb #pmx{margin-bottom:6px!important}.pmb .row{flex:none}.pmb .row .pri,.pmb .pmbtn{min-height:46px}}
+/*v44 modal colors*/
+.pmb{background:linear-gradient(180deg,rgba(30,64,130,.55),rgba(10,16,32,.6) 38%,rgba(6,9,18,.95)),#070a12!important;border:1px solid rgba(70,110,200,.35)!important;box-shadow:0 30px 80px -24px rgba(30,90,255,.4),inset 0 1px 0 rgba(255,255,255,.06)!important}
+.pmi{background:linear-gradient(135deg,#1f54e0,#3d8bff 60%,#5cc0ff)!important;box-shadow:0 8px 22px -8px rgba(61,139,255,.6)!important}
+.pmbar div{background:linear-gradient(90deg,#1f54e0,#3d8bff,#5cc0ff)!important}
+.pmb .est{background:linear-gradient(180deg,rgba(24,44,92,.45),rgba(8,12,24,.7))!important;border:1px solid rgba(70,110,200,.25)!important;border-radius:14px}
+.pmbtn{background:rgba(10,14,26,.9);border-color:rgba(70,110,200,.3)}
+.pst.act i{border-color:#3d8bff!important;border-top-color:transparent!important}
+/*v47 wide*/
+@media(min-width:900px){html:not(.embed) #det .dbody{max-width:1760px;padding:16px 28px 60px}
+#det .dtop{padding:12px 28px}
+#det .dmine{display:inline-block;min-width:340px;margin-right:12px;vertical-align:top}
+#det .dtabs{display:inline-flex;width:calc(100% - 360px);vertical-align:top;margin:10px 0;gap:10px}
+#det .dtabs button{padding:18px 10px}
+#det #dtkf{margin-top:10px!important;border-radius:16px}
+#det #dpane{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:14px;align-items:start}
+#det #dpane .card{margin:0}
+#det .dgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#det{background:radial-gradient(900px 500px at 20% -10%,rgba(40,80,200,.22),transparent 60%),radial-gradient(700px 400px at 90% 0,rgba(30,70,170,.14),transparent 60%),#070a12!important}
+#det .dsub,#det .dst{background:linear-gradient(180deg,rgba(26,46,96,.4),rgba(8,12,24,.7));border:1px solid rgba(70,110,200,.25)}
+/*v48 scroll*/
+#det{overflow-y:auto!important;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
+#det #dtkf{touch-action:pan-y}
+#det svg,#det canvas{touch-action:pan-y!important}
 </style></head><body>
 <div class="wrap">
 <header><a class="logo" href="/">XRPL<i>TODAY</i></a><span class="chip"><span class="dot" id="nd"></span><span id="nt">connecting…</span></span><span class="sp"></span><span class="chip mono" id="px">XRP —</span><span class="chip hide" id="wchip"></span><button class="hide" id="disc">Disconnect</button></header>
@@ -243,7 +266,7 @@ function paint(rows){ROWS=rows;updateAct();var base=loadBase(),first=!base;
 var BF='all',SKIP=false;
 function tile(a,b,c){return '<div class="tile"><small>'+a+'</small><b>'+b+'</b><em>'+(c||'&nbsp;')+'</em></div>'}
 function olab(a){var b=bal(a);return esc(lbl(a))+(a.i?' · '+esc(a.i.slice(0,5))+'…':'')+(b>0?' — '+nf(b):'')}
-function fillSel(){['sf','st','pa','pb'].forEach(function(id){var s=$(id),cur=s.value;s.innerHTML=AS.map(function(a,i){return '<option value="'+i+'">'+olab(a)+'</option>'}).join('');if(cur&&AS[+cur])s.value=cur;else{if(id==='sf'||id==='pa')s.value='0';if(id==='st'||id==='pb')s.value=String(Math.max(1,INIT?AS.findIndex(function(a){return key(a)===key(INIT)}):AS.findIndex(function(a){return a.n==='FUZZY'})))}});}
+document.addEventListener('change',function(e){var s=e.target;if(s&&s.tagName==='SELECT'&&['sf','st','pa','pb'].indexOf(s.id)>=0&&AS[+s.value])s.__k=key(AS[+s.value])},true);function fillSel(){['sf','st','pa','pb'].forEach(function(id){var s=$(id),cur=s.value,ck=(s.__k&&s.__k)||(cur!==''&&AS[+cur]?key(AS[+cur]):null);s.innerHTML=AS.map(function(a,i){return '<option value="'+i+'">'+olab(a)+'</option>'}).join('');var ni=ck?AS.findIndex(function(x){return key(x)===ck}):-1;if(ni>=0)s.value=String(ni);else if(cur&&AS[+cur]&&!ck)s.value=cur;else{if(id==='sf'||id==='pa')s.value='0';if(id==='st'||id==='pb')s.value=String(Math.max(1,INIT?AS.findIndex(function(a){return key(a)===key(INIT)}):AS.findIndex(function(a){return a.n==='FUZZY'})))}});}
 function bal(a){if(a.c==='XRP')return xrpAvail();var l=LINES.filter(function(x){return x.currency===a.c&&x.account===a.i})[0];return l?+l.balance:0}
 function sBal(){var a=AS[+$('sf').value],b=AS[+$('st').value];if(a)$('sfb').textContent='Balance: '+nf(bal(a))+' '+lbl(a)+(a.c==='XRP'?' (spendable)':'');if(b)$('stb').textContent='Balance: '+nf(bal(b))+' '+lbl(b);var w=$('swl');if(w&&ADDR)w.innerHTML='Wallet '+esc(ADDR.slice(0,6))+'…'+esc(ADDR.slice(-5))+' · <b>'+nf(XRPB)+' XRP</b> ('+usd(XRPB*XU)+') · '+(ACTIVE?'active':'inactive')}
 function postRefresh(){AMMC={};PXC={};return refresh().then(function(){return new Promise(function(r){setTimeout(r,2500)})}).then(function(){AMMC={};PXC={};return refresh()})}
@@ -527,7 +550,7 @@ function showTL(){if(WATCH){toast('Watch-only wallet: import the seed to add tru
   $('tlgo').disabled=true;w.textContent='Checking issuer…';
   req({command:'account_info',account:iss,ledger_index:'validated'}).catch(function(e){if(e&&e.data&&e.data.error==='actNotFound')throw new Error('That issuer account does not exist on the XRP Ledger.');throw e}).then(function(){return req({command:'gateway_balances',account:iss,ledger_index:'validated'}).catch(function(){return null})}).then(function(g){var ob=g&&g.obligations;if(ob&&Object.keys(ob).length&&!ob[cur]&&!confirm('This issuer has not issued "'+$('tlc').value.trim()+'". It may be a typo. Add the trustline anyway?'))throw new Error('Cancelled');
    var tx={TransactionType:'TrustSet',Account:ADDR,LimitAmount:{currency:cur,issuer:iss,value:fx(lim)},Flags:0x00020000};w.textContent=has?'Updating limit…':'Adding trustline…';return submit(tx,(has?'Update':'Add')+' trustline '+$('tlc').value.trim()+' · '+iss.slice(0,6)+'…')}).then(function(){toast('Trustline added');closeM();return postRefresh()}).catch(function(e){var m=e&&e.message||String(e);if(m==='Cancelled')w.textContent='';else{w.className='dn sm';w.textContent=m}$('tlgo').disabled=false})}}
-window.addEventListener('message',function(e){var f=$('dtkf');if(f&&e.data&&e.data.xdTk&&e.source===f.contentWindow)f.style.height=Math.max(600,e.data.h)+'px'});
+window.addEventListener('message',function(e){var f=$('dtkf');if(f&&e.data&&e.data.xdTk&&e.source===f.contentWindow)f.style.height=Math.max(600,e.data.h+40)+'px'});
 function dStat(l,v){return v==null?'':'<div class="dst"><div class="dk">'+l+'</div><div>'+v+'</div></div>'}
 function openDet(k){var r=null;for(var i=0;i<ROWS.length;i++)if(ROWS[i].k===k){r=ROWS[i];break}if(!r)return;var lp=r.lp,a=r.a,xr=!lp&&a.c==='XRP';DT={tf:xr?'3600':'1h',md5:null,t:null,r:r,xrp:xr,o:null,ct:DT.ct||'area',vol:DT.vol!==false,sma:!!DT.sma,usd:!!DT.usd};var nm=lp?lbl(r.ca)+' / '+lbl(r.cb):lbl(a),hasPair=lp||!xr;
  var tfs=xr?[['900','15m'],['3600','1h'],['21600','6h'],['86400','1d']]:[['15m','15m'],['1h','1h'],['4h','4h'],['1d','1d']];
@@ -535,7 +558,7 @@ function openDet(k){var r=null;for(var i=0;i<ROWS.length;i++)if(ROWS[i].k===k){r
  +(true?'':'<div class="dhero"><div class="dk">Price</div><div class="dpr"><div><div class="dbig" id="dpxu">'+(xr?'$'+nf(XU):(r.bal>0&&r.x!=null?'$'+nf(r.x/r.bal*XU):'—'))+'</div><div class="mu sm">USD</div></div><div><div class="dbig" id="dpxx">'+(xr?'1':(r.bal>0&&r.x!=null?nf(r.x/r.bal):'—'))+'</div><div class="mu sm">XRP</div></div></div><div class="mu sm" id="dpx2"></div></div>')
  +'<div class="card dsub dmine"><div class="dk">Your balance</div><div class="dbal">'+nf(r.bal)+' <small>'+esc(lp?'LP tokens':lbl(a))+'</small></div><div class="mu">Worth '+(r.x!=null?nf(r.x)+' XRP · '+usd(r.u):'unpriced')+'</div>'+(lp?'<div class="mu sm" style="margin-top:6px">'+(r.sh*100).toFixed(4)+'% of pool = '+nf(r.va)+' '+esc(lbl(r.ca))+' + '+nf(r.vb)+' '+esc(lbl(r.cb))+'</div>':'')+'</div>'
  +(true?'':'<div class="card dsub"><div class="tabs" id="dtf" style="margin:0 0 8px">'+tfs.map(function(t){return '<button data-f="'+t[0]+'"'+(t[0]===DT.tf?' class="on"':'')+'>'+t[1]+'</button>'}).join('')+'</div><div class="dopt" id="dopt"></div><div id="dchart"></div></div><div class="dgrid" id="dstats"></div>')
- +'<div class="dtabs" id="dact"><button data-a="swap">⇄ Swap</button>'+(lp?'':'<button data-a="send">↑ Send</button>')+'<button data-a="recv">↓ Receive</button>'+(hasPair?'<button data-a="liq">💧 Liquidity</button>':'')+'</div><div id="dpane"></div>'+(!lp?'<iframe id="dtkf" title="Token" src="/token/'+(xr?'xrp':encodeURIComponent(a.i+'-'+hex40(a.c)))+'?embed=1" style="width:100%;height:1400px;border:0;margin-top:12px;border-radius:14px;background:transparent;display:block"></iframe>':'')
+ +'<div class="dtabs" id="dact"><button data-a="swap">⇄ Swap</button>'+(lp?'':'<button data-a="send">↑ Send</button>')+'<button data-a="recv">↓ Receive</button>'+(hasPair?'<button data-a="liq">💧 Liquidity</button>':'')+'</div><div id="dpane"></div>'+(!lp?'<iframe id="dtkf" scrolling="no" title="Token" src="/token/'+(xr?'xrp':encodeURIComponent(a.i+'-'+hex40(a.c)))+'?embed=1" style="width:100%;height:1400px;border:0;margin-top:12px;border-radius:14px;background:transparent;display:block"></iframe>':'')
  +'<div class="dgrid" id="dinfo"></div><div class="dlinks hide" id="dlinks"></div><p class="mu" style="font-size:11px;margin-top:10px">Market data by xrpl.to. Not financial advice. Illiquid tokens can be volatile and easily manipulated.</p></div>';
  var d=$('det');d.innerHTML=h;d.classList.remove('hide');document.body.style.overflow='hidden';$('dback').onclick=closeDet;d.scrollTop=0;
  var pair=function(){return lp?[r.ca,r.cb]:xr?[{c:'XRP',i:''},null]:[a,{c:'XRP',i:''}]};

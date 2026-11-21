@@ -295,7 +295,7 @@ var _xl=window.XD_load;window.XD_load=function(d){_xl(d);try{enhMkt();var l=docu
 
 /* v5: blog share bar */
 (function(){function share(a){var h=a.querySelector('h2'),t=h?h.textContent:'XRPLTODAY',u=location.href.split('#')[0],tx=encodeURIComponent(t+' — via XRPLTODAY'),uu=encodeURIComponent(u);
- var d=document.createElement('div');d.className='shr';d.innerHTML='<span class="mu">Share</span><a class="btn2 pri" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(t+'\n\n'+u+'\n\nView at XRPLTODAY.com #XRPL #XRP #XRPLTODAY')+'">Post to X ↗</a><a class="btn2" target="_blank" rel="noopener" href="https://t.me/share/url?url='+uu+'&text='+tx+'">Telegram</a><a class="btn2" target="_blank" rel="noopener" href="https://www.reddit.com/submit?url='+uu+'&title='+tx+'">Reddit</a><button class="btn2" data-cp="1">Copy link</button><button class="btn2" data-sh="1">Share…</button>';
+ var d=document.createElement('div');d.className='shr';d.innerHTML='<span class="mu">Share</span><a class="btn2 pri" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(t+'\n\n'+u+'\n\nView at XRPLTODAY.com #XRPL #XRP #XRPLTODAY')+'">Post to X ↗</a><a class="btn2" target="_blank" rel="noopener" href="https://t.me/share/url?url='+uu+'&text='+tx+'">Telegram</a><a class="btn2" target="_blank" rel="noopener" href="https://www.reddit.com/submit?url='+uu+'&title='+tx+'">Reddit</a><button class="btn2" data-ci="1">Copy image</button><button class="btn2" data-cp="1">Copy link</button><button class="btn2" data-sh="1">Share…</button>';
  d.onclick=function(e){var b=e.target.closest('button');if(!b)return;if(b.getAttribute('data-cp')){try{navigator.clipboard.writeText(u).then(function(){window.XDtoast&&window.XDtoast('Link copied')})}catch(x){}}else if(navigator.share)navigator.share({title:t,url:u}).catch(function(){});else{try{navigator.clipboard.writeText(u);window.XDtoast&&window.XDtoast('Link copied')}catch(x){}}};
  var am=a.querySelector('.am');if(am)am.parentNode.insertBefore(d,am.nextSibling);var bt=el('div','shr');bt.innerHTML=d.innerHTML;bt.onclick=d.onclick;var dc=a.querySelector('.disc');if(dc)dc.parentNode.insertBefore(bt,dc)}
  var m2=new MutationObserver(function(){var a=document.querySelector('#vPost .art');if(!a||a.getAttribute('data-sh')||!a.querySelector('h2'))return;a.setAttribute('data-sh','1');share(a)});
@@ -359,7 +359,7 @@ document.addEventListener('click',function(e){
  if(a.id==='tvx'){it=window.__tvit;if(!it)return;e.preventDefault();var tx=it.t+'\n\n'+(it.u||location.origin)+'\n\nView at XRPLTODAY.com #XRPL #XRP #XRPLTODAY';window.XDshareX(it,'https://twitter.com/intent/tweet?text='+encodeURIComponent(tx));return}
  if(a.closest('#vToken'))return;
  url=a.getAttribute('href');var q=new URL(url).searchParams.get('text')||'';
- var im=firstImg();if(!im)return;
+ var im=firstImg();
  e.preventDefault();window.XDshareX({t:q.split('\n\n')[0],s:(document.title||'XRPLTODAY').split('—')[0],im:im},url)},true);
 })();
 
@@ -470,3 +470,6 @@ window.addEventListener('resize',fit);setInterval(fit,2000);setTimeout(fit,300);
 
 /* upgrade small feed thumbnails to the article's full-size cover (fixes blurry images) */
 (function(){var C={};document.addEventListener('load',function(e){var t=e.target;if(!t||t.tagName!=='IMG'||!t.classList||!t.classList.contains('cvr')||t.__up)return;if(!(t.naturalWidth&&t.naturalWidth<480))return;t.__up=1;var u=t.getAttribute('data-u');if(!u)return;(C[u]!==undefined?Promise.resolve({im:C[u]}):fetch('/api/cover?u='+encodeURIComponent(u)).then(function(r){return r.json()})).then(function(d){var im=d&&d.im||'';C[u]=im;if(!im||im===t.currentSrc||im===t.src)return;var g=new Image();g.referrerPolicy='no-referrer';g.onload=function(){if(g.naturalWidth>t.naturalWidth&&t.parentNode)t.src=im};g.src=im}).catch(function(){})},true)})();
+
+/*v49 img*/
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-ci]');if(!b)return;e.preventDefault();var im=(document.querySelector('#vPost .art img,#vPost img,.mkart img')||{}).src||'';var h=document.querySelector('#vPost h1,#vPost h2,.mkart h1')||{};var it={t:(h.textContent||document.title).trim(),s:(document.title||'XRPLTODAY').split('—')[0],im:im};var p=window.XDpng(it);try{navigator.clipboard.write([new ClipboardItem({'image/png':p})]).then(function(){window.XDtoast&&XDtoast('Image copied — paste it into your X post')},function(){p.then(function(bl){var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='xrpltoday-post.png';a.click()})})}catch(x){p.then(function(bl){var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='xrpltoday-post.png';a.click()})}},true);
